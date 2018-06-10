@@ -4,6 +4,13 @@ import java.util.ArrayList;
 import java.util.Iterator;
 
 /**
+ * 03.06.2018	
+ * NEW:
+ * -	changes necessary for Lucene made
+ * @author Lia
+ */
+
+/**
  * 27.05.2018
  * TO DO:
  * -	consider category in code? -> in DatabaseCommunicator?
@@ -127,7 +134,7 @@ public class MessageManager {
 	 * receives the msg, decodes it and calls the corresponding function
 	 * Also updates the context in the process
 	 */
-	public String decodeMsg(String msg, Settings settings, DatabaseCommunicator dbC, Context context) {
+	public String decodeMsg(String msg, Settings settings, DatabaseCommunicator dbC, Context context, Lucene lucene) {
 		
 		String ww; // the wished word
 		Function f; // the function
@@ -155,7 +162,7 @@ public class MessageManager {
 			switch(f) {
 				
 				case TRANSLATION: 
-					result = dbC.translate(ww, settings.getNOW_translation());
+					result = lucene.translate(ww, settings.getNOW_translation());
 					break;
 				case DEFINITION:
 					result = dbC.define(ww, settings.getNOW_definition());
