@@ -4,6 +4,13 @@ import java.io.Serializable;
 import java.util.ArrayList;
 
 /**
+ * 10.06.2018
+ * NEW:
+ * -	Documentation improved.
+ * @author Walter
+ */
+
+/**
  * 03.06.2018
  * NEW:
  * -	Context is now savable
@@ -30,6 +37,12 @@ import java.util.ArrayList;
  *
  */
 
+/**
+ * Context remembers the important information of the last user queries.
+ * This includes the wished word, category and function. The information is used to improve the answer for the user.
+ *
+ * Context is will be persistently saved through State.
+ */
 public class Context implements Serializable {
 
 	/** VARIABlES **/
@@ -37,21 +50,22 @@ public class Context implements Serializable {
 	
 	private Function lastFunctionUsed;
 	private ArrayList<String> preferredCategory;
-	private String lastWishedWord; // The "Wished Word", is the word, the function will be applied to
+	private String lastWishedWord;
 
-	
-	
 	/** Constructor **/
 	public Context(){
 		preferredCategory = new ArrayList<String>();
 	}
 	
-	
 	/** Methods **/
-	
-	/*
-	 * This function finds out what change the user wants to make to the preferred categories by checking
-	 * for keywords and then calls the function which will make the change.
+
+	/**
+	 * This function finds out what change the user wants to make to the preferred categories
+	 * by checking for keywords. Then the function which will make the change is called.
+	 * Categories are groups of words to distinguish between seemingly same words.
+	 * They can be added or removed.
+	 *
+	 * @param msg from the user
 	 */
 	public void changePrefCat(String msg) {
 		
@@ -83,12 +97,22 @@ public class Context implements Serializable {
 		}
 		
 	}
-	
+
+	/**
+	 * A category will be added as by the users request. If none was found the user will be notified.
+	 *
+	 * @param cat category the user wants to add
+	 */
 	private void addPrefCat(String cat) {
 		preferredCategory.add(cat);
 		System.out.println(cat + " was added to your preferred categories.");
 	}
-	
+
+	/**
+	 * A category will be removed as by the users request. If none was found the user will be notified.
+	 *
+	 * @param cat category the user wants to remove
+	 */
 	private void removePrefCat(String cat) {
 		if(preferredCategory.contains(cat)) {
 			preferredCategory.remove(cat);
@@ -98,14 +122,17 @@ public class Context implements Serializable {
 			System.out.println(cat + " could not be found in your preferred categories.");
 		}
 	}
-	
+
+	/**
+	 * All categories will be removed.
+	 */
 	private void deleteAllPrefCat() {
 		preferredCategory.clear();
 		System.out.println("All your preferred categories were deleted.");
 	}
-
 	
 	/** Setters and Getters **/
+
 	public Function getLastFunctionUsed() {
 		return lastFunctionUsed;
 	}

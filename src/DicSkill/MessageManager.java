@@ -4,10 +4,12 @@ import java.util.ArrayList;
 import java.util.Iterator;
 
 /**
- * 03.06.2018	
+ * 10.06.2018
+ * TO DO:
+ * -	consider category in code? -> in DatabaseCommunicator?
  * NEW:
- * -	changes necessary for Lucene made
- * @author Lia
+ * -	documentation improved
+ * @author Walter
  */
 
 /**
@@ -45,9 +47,15 @@ import java.util.Iterator;
  * @author Lia
  */
 
+/**
+ * MessageManager is the first class to receive the users query.
+ * It then proceeds to prepare the message, searches for the wished word and the appropriate functions.
+ * When an answer is returned from the DatabaseCommunicator, MessageManager creates a humanly understandable answer.
+ */
 public class MessageManager {
 	
 	/** VARIABlES **/
+    // Keywords define which function will be called.
 	private ArrayList<String> keywords_translation;
 	private ArrayList<String> keywords_definition;
 	private ArrayList<String> keywords_synonyms;
@@ -60,15 +68,13 @@ public class MessageManager {
 	private ArrayList<String> keywords_setting;
 	private ArrayList<String> keywords_whatCanYouDo;
 	private ArrayList<String> keywords_changePrefCat;
-	
-	int positionOfFunction;
-	
-	
-	
+
+	private int positionOfFunction;
+
 	/** Constructor **/
 	public MessageManager() {
 		
-		//All keywords are set here
+		// All keywords are set here
 		
 		// TRANSLATION
 		keywords_translation = new ArrayList<String>();
@@ -123,64 +129,70 @@ public class MessageManager {
 		keywords_changePrefCat = new ArrayList<String>();
 		keywords_changePrefCat.add("preferred category");
 		keywords_changePrefCat.add("preferred categories");
-		
 	}
-	
-	
+
 	/** Methods **/
-	
-	
-	/*
-	 * receives the msg, decodes it and calls the corresponding function
-	 * Also updates the context in the process
-	 */
-	public String decodeMsg(String msg, Settings settings, DatabaseCommunicator dbC, Context context, Lucene lucene) {
+
+    /**
+	 * This method is the primary method for the interface. A message is received and
+	 * will be decoded. Depending on the result the appropriate function will be called.
+	 *
+     * Also updates the context in the process.
+	 *
+	 * Error messages will be returned when neither a function or a wishedWord was found.
+     *
+     * @param msg Message from the user
+     * @param settings
+     * @param dbC
+     * @param context
+     * @return answer for the user
+     */
+	public String decodeMsg(String msg, Settings settings, DatabaseCommunicator dbC, Context context) {
 		
-		String ww; // the wished word
-		Function f; // the function
-		String[] result; // the result received from the DatabaseCommunicator 
-		
-		
-		/* 	Calls the functions, which finds and returns the wished word and function to set parameters.
-			Returns an error msg if function or ww could not be found (== null) */
-		ww = findWishedWord(msg, context);
-		f = findFunction(msg);
-		if(f == null)
+		String wishedWord;
+		Function function;
+		String[] result; 		// the result received from the DatabaseCommunicator
+
+
+		wishedWord = findWishedWord(msg, context);
+		function = findFunction(msg);
+
+		if(function == null)
 			return "Sorry, I don't know which function you are asking for.";
+
 		/*if(ww == null) {
 			return "Sorry, I don't know which word you're asking for.";
 		}*/
 		
 
 		/*
-		 *  while a result for the wished word (consisting of multiple(!) words) could not be found,
+		 *  While a result for the wished word (consisting of multiple(!) words) could not be found,
 		 *  the wished word will be shortened by one word and the search for a result will be repeated.
 		 *  When the wished word is null, it means that a result could not be found for the wished word.
 		 */
-		do {			
-			// Calls the corresponding function depending on the result of the evaluation above
-			switch(f) {
+		do {
+			switch(function) {
 				
 				case TRANSLATION: 
-					result = lucene.translate(ww, settings.getNOW_translation());
+					result = dbC.translate(wishedWord, settings.getNOW_translation());
 					break;
 				case DEFINITION:
-					result = dbC.define(ww, settings.getNOW_definition());
+					result = dbC.define(wishedWord, settings.getNOW_definition());
 					break;
 				case SPELLING:
-					result = dbC.spell(ww);
+					result = dbC.spell(wishedWord);
 					break;
 				case SYNONYMS:
-					result = dbC.giveSynonyms(ww, settings.getNOW_synonyms());
+					result = dbC.giveSynonyms(wishedWord, settings.getNOW_synonyms());
 					break;
 				case SCRABBLE_START:
-					result = dbC.scrabble_start(ww, settings.getNOW_scrabble());
+					result = dbC.scrabble_start(wishedWord, settings.getNOW_scrabble());
 					break;
 				case SCRABBLE_CONTAIN:
-					result = dbC.scrabble_contain(ww, settings.getNOW_scrabble());
+					result = dbC.scrabble_contain(wishedWord, settings.getNOW_scrabble());
 					break;
 				case SCRABBLE_END:
-					result = dbC.scrabble_end(ww, settings.getNOW_scrabble());
+					result = dbC.scrabble_end(wishedWord, settings.getNOW_scrabble());
 					break;
 				case SETTING:
 					settings.setNOW(msg);
@@ -203,20 +215,23 @@ public class MessageManager {
 				}
 			
 			if(result == null)
-				ww = shortenWishedWord(ww); // removes the last word from the wished word
+				wishedWord = shortenWishedWord(wishedWord); // removes the last word from the wished word
 		
-		}while(result == null && ww != null);
+		}while(result == null && wishedWord != null);
 		
 		// Updates the context
-		context.setLastFunctionUsed(f);
-		context.setLastWishedWord(ww);
-		
-		// returns the msg
+		context.setLastFunctionUsed(function);
+		context.setLastWishedWord(wishedWord);
+
 		return createMsg(context, resultToString(result));
 	}
-	
-	/*
-	 * finds and returns the requested function in the msg
+
+	/**
+	 * Finds and returns the requested function in the message.
+	 * If no function was found, null will be returned.
+	 *
+	 * @param msg message from the user
+	 * @return Function
 	 */
 	private Function findFunction(String msg){
 		
@@ -315,64 +330,74 @@ public class MessageManager {
 		return null;
 	}
 
-	
-	/*
-	 * finds and returns the wished word in the msg. if there is no (new) wished word, it sets the last wished word
+	/**
+	 * Finds and returns the wished word in the message.
+	 *
+	 * If there is no (new) wished word the last used wished word will be used.
+	 * In this case Context will be called.
+	 *
+	 * @param msg message from the user
+	 * @param context
+	 * @return String wishedWord that was found
 	 */
 	private String findWishedWord(String msg, Context context){
 		
-		String ww;
+		String wishedWord;
+
 		/*
-		 * all different words which indicate the position of the ww will be tested here.
-		 * if the msg contains such a word, a substring will be created which starts at the 
+		 * All different words which indicate the position of the wishedWord will be tested here.
+		 * If the msg contains such a word, a substring will be created which starts at the
 		 * msg.lastIndexOf the found word + the length of the word + 1
 		 * When the ww ends will still have to be taken in account later on
 		 */
 		
 		// *of* ; e.g. meaning/translation/spelling of
 		if(msg.contains("of")) {
-			ww = msg.substring(msg.lastIndexOf("of")+3);
-			context.setLastWishedWord(ww);
-			return ww;
+			wishedWord = msg.substring(msg.lastIndexOf("of")+3);
+			context.setLastWishedWord(wishedWord);
+			return wishedWord;
 		}
 		
 		// *with*
 		if(msg.contains("with")) {
-			ww = msg.substring(msg.lastIndexOf("with")+5);
-			context.setLastWishedWord(ww);
-			return ww;
+			wishedWord = msg.substring(msg.lastIndexOf("with")+5);
+			context.setLastWishedWord(wishedWord);
+			return wishedWord;
 		}
 		
 		// ** keywords after which is directly followed by the ww (translate, define, spell, contain)
 		if(msg.contains("translate")) {
-			ww = msg.substring(msg.lastIndexOf("translate")+10);
-			context.setLastWishedWord(ww);
-			return ww;
+			wishedWord = msg.substring(msg.lastIndexOf("translate")+10);
+			context.setLastWishedWord(wishedWord);
+			return wishedWord;
 		}
 		if(msg.contains("define")) {
-			ww = msg.substring(msg.lastIndexOf("define")+7);
-			context.setLastWishedWord(ww);
-			return ww;
+			wishedWord = msg.substring(msg.lastIndexOf("define")+7);
+			context.setLastWishedWord(wishedWord);
+			return wishedWord;
 		}
 		if(msg.contains("spell")) {
-			ww = msg.substring(msg.lastIndexOf("spell")+6);
-			context.setLastWishedWord(ww);
-			return ww;
+			wishedWord = msg.substring(msg.lastIndexOf("spell")+6);
+			context.setLastWishedWord(wishedWord);
+			return wishedWord;
 		}
 		if(msg.contains("contain")) {
-			ww = msg.substring(msg.lastIndexOf("contain")+8);
-			context.setLastWishedWord(ww);
-			return ww;
+			wishedWord = msg.substring(msg.lastIndexOf("contain")+8);
+			context.setLastWishedWord(wishedWord);
+			return wishedWord;
 		}
-		
-		
-		// return ww from context in case no ww found
+
 		return context.getLastWishedWord();
-		
 	}
-	
-	
-	// creates a msg depending on the used function, the wished word and the result
+
+	/**
+	 * This method creates a message for the user after an appropriate answer was found.
+	 * The answer depends on the used function, wished word and the result.
+	 *
+	 * @param context
+	 * @param result output from the function
+	 * @return String the final message for the user
+	 */
 	private String createMsg(Context context, String result) {
 		
 		switch(context.getLastFunctionUsed()) {
@@ -408,46 +433,45 @@ public class MessageManager {
 			default:
 				return "Error: Message could not be created.";
 		}
-		
-		
 	}
-	
-	
-	//converts the array of results into one string to simplyfy msg generator
-	private String resultToString(String[] result){
+
+	/**
+	 * All possible outputs from the array are transformed into one String.
+	 *
+	 * @param result from the function
+	 * @return String answer
+	 */
+	private String resultToString(String[] result) {
 		
-		if(result == null)
-		{
+		if(result == null) {
 			return null;
 		}
 		
 		String allResults = "";
+
 		for(int i=0; i<result.length; i++) {
 			allResults += result[i]+" ";
 		}
 		
 		return allResults;
 	}
-	
-	/*
-	 * This function removes the last word from the wished word by looking for a space and then
-	 * removing the space and everything that comes afterwards.
+
+	/**
+	 * The trail after the wished word will be removed.
+	 * This includes spaces and unnecessary words.
+	 *
+	 * @param ww wished word
+	 * @return String shortened wished word
 	 */
 	public String shortenWishedWord(String ww) {
 		
-		int shortenPosTo = ww.length(); // shortenPosTo equals the last pos of the ww
+		int shortenPosTo = ww.length();
 		
 		// finds the position of the first " " starting from the end/right of the ww
 		while( shortenPosTo > 0 && !(ww.substring(shortenPosTo-1, shortenPosTo).equals(new String(" ")) )) {
 			shortenPosTo--;
 		}
-		
-		/*
-		 *  shortenPosTo == 1 would mean that the shortenedWishedWord would be an empty String.
-		 *  shortenPosTo == ww.length() would mean that the shortenedWishedWord would be unchanged.
-		 *  Therefore the function will return null in this case to indicate that no valid wished word
-		 *  would be found after an attempt to shorten the wished word.
-		 */
+
 		if(shortenPosTo == 1 || shortenPosTo == ww.length()) {
 			return null;
 		}
@@ -456,8 +480,4 @@ public class MessageManager {
 			return shortenedWishedWord;
 		}
 	}
-		
-	
-	/** Setters and Getters **/
-
 }
