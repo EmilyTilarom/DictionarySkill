@@ -26,6 +26,7 @@ public class DictionarySkill {
 	
 	public static void main(String[] args)
 	{
+		Lucene lucene = new Lucene();
 		State state = new State();
 		Context context = state.loadContext(); // loads context. If no context is found, creates new one.
 		Settings settings = state.loadSettings(); // loads settings. If no settings is found, creates new one.
@@ -42,7 +43,7 @@ public class DictionarySkill {
 		
 		while(!msg.equals("bye"))
 		{
-			System.out.println( tb.decodeMsg(msg, settings, dbC, context) );
+			System.out.println( tb.decodeMsg(msg, settings, dbC, context, lucene) );
 			msg = read.nextLine();
 			msg.toLowerCase();
 		}
