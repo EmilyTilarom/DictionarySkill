@@ -1,5 +1,6 @@
 package DicSkill;
 
+import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
@@ -45,6 +46,15 @@ public class Lucene {
 	/** CONSTRUCTOR **/
 	public Lucene() {
 		try {
+			File file = new File("./dict/German/indexDirectory");
+
+			if(file.isDirectory()) {
+
+				if (file.list().length > 0) {
+					createIndex();
+				}
+			}
+
 			createIndex();
 		}
 		catch (IOException e) {
@@ -130,17 +140,20 @@ public class Lucene {
 			if(nextLine.isEmpty()) continue;
 			
 			String[] parts = nextLine.split("::");
-			
-			/*for(int i=0; i<parts.length; i++) {
+
+			/*
+			for(int i=0; i<parts.length; i++) {
 				System.out.println(parts[i]);
 			}*/
 			
 			Document doc = new Document();
-			doc.add(new Field("english", parts[1], TextField.TYPE_STORED));
+			//System.out.println(parts[0]);
 			doc.add(new Field("german", parts[0], TextField.TYPE_STORED));
+			doc.add(new Field("english", parts[1], TextField.TYPE_STORED));
 			iwriter.addDocument(doc);
 		}
 		iwriter.close();
+		System.out.println("closed");
 	}
 
 	private ArrayList<String> searchIndex(String ww) throws IOException, ParseException {
@@ -150,7 +163,9 @@ public class Lucene {
 		 * To accomplish best results, we would have to search for the phrase "| cat flap "
 		 * later it must be replaced with "| "+ww+" "
 		 */
-		String searchWord = "cat flap";
+		//String searchWord = "cat flap";
+
+		String searchWord = ww;
 		
 		// Now search the index:
 		DirectoryReader ireader = DirectoryReader.open(directory);
