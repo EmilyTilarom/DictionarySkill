@@ -29,17 +29,20 @@ import java.io.Serializable;
  *
  */
 
+/**
+ * This class enabled the user to modify the ouput. He can change the NOW (Number of words)
+ * to get a specific number of results for each function. 
+ */
 public class Settings implements Serializable  
 {
 	/** VARIABlES **/
 	private static final long serialVersionUID = 5L;
-	
+
 	// NOW = Number Of Words
 	private int NOW_translation;
 	private int NOW_definition;
 	private int NOW_synonyms;
 	private int NOW_scrabble;
-	
 	
 	/** Constructor **/
 	public Settings()
@@ -51,61 +54,67 @@ public class Settings implements Serializable
 	}
 	
 	/** Methods **/
-	private void setAll(int x)
-	{
-		this.NOW_translation = x;
-		this.NOW_definition = x;
-		this.NOW_synonyms = x;
-		this.NOW_scrabble = x;
+
+	/**
+	 * The NOW (Number of Words) for all functions will be changed.
+	 *
+	 * @param newNOW
+	 */
+	private void setAll(int newNOW) {
+		this.NOW_translation = newNOW;
+		this.NOW_definition = newNOW;
+		this.NOW_synonyms = newNOW;
+		this.NOW_scrabble = newNOW;
 	}
-	
-	public void setNOW(String msg)
-	{
-		// functionFound will indicate wether or not a function has been found
+
+	/**
+	 * This function is called to set the NOW (Number of Words) for a specific function.
+	 *
+	 * @param msg message from the user
+	 */
+	public void setNOW(String msg) {
+
 		boolean functionFound = false;
-		
-		// x is the number to which the user wants to set one or all NOW to
+		int newNOW;
+
 		try {
-			int x = Integer.parseInt( msg.substring(msg.lastIndexOf("to")+3) );
+			newNOW = Integer.parseInt( msg.substring(msg.lastIndexOf("to")+3) );
 			
 			if(msg.contains("translations")) {
-				NOW_translation = x;
+				NOW_translation = newNOW;
 				functionFound = true;
-				System.out.println("Number of words for translations have been set to "+x);
+				System.out.println("Number of words for translations have been set to "+newNOW);
 			}
 			if(msg.contains("definitions")) {
-				NOW_definition = x;
+				NOW_definition = newNOW;
 				functionFound = true;
-				System.out.println("Number of words for definitions have been set to "+x);
+				System.out.println("Number of words for definitions have been set to "+newNOW);
 			}
 			if(msg.contains("synonyms")) {
-				NOW_synonyms = x;
+				NOW_synonyms = newNOW;
 				functionFound = true;
-				System.out.println("Number of words for synonyms have been set to "+x);
+				System.out.println("Number of words for synonyms have been set to "+newNOW);
 			}
 			if(msg.contains("scrabble")) {
-				NOW_definition = x;
+				NOW_definition = newNOW;
 				functionFound = true;
-				System.out.println("Number of words for scrabble have been set to "+x);
+				System.out.println("Number of words for scrabble have been set to "+newNOW);
 			}
 			if(msg.contains("all")) {
-				setAll(x);
+				setAll(newNOW);
 				functionFound = true;
-				System.out.println("Number of words for all have been set to "+x);
+				System.out.println("Number of words for all have been set to "+newNOW);
 			}
 		}
-		catch (NumberFormatException e)
-		{
+		catch (NumberFormatException e) {
 			System.out.print("Sorry, you must set the number of words to a certain number.");
 		}		
 		
-		if(functionFound == false)
-		{
+		if(functionFound == false) {
 			System.out.print("Sorry, you must indicate which function you want to change the "
 					+ "number of words for. You may choose: definitons, translations, synonyms, scrabble or all.");
 		}
 	}
-
 	
 	/** Setters and Getters **/
 	public int getNOW_translation() {

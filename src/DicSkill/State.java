@@ -8,6 +8,13 @@ import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 
 /**
+ * 10.06.2018
+ * NEW:
+ * -	Documentation improved.
+ * @author Walter
+ */
+
+/**
  * 03.06.2018
  * NEW:
  * -	State can now save and load context and settings
@@ -18,7 +25,7 @@ import java.io.ObjectOutputStream;
 /**
  * 29.04.2018
  * TO DO:
- * -	make class to save context and settings
+ * -	Make class to save context and settings
  * @author Lia
  *
  */
@@ -26,42 +33,47 @@ import java.io.ObjectOutputStream;
 public class State {
 	
 	/** VARIABlES **/
-	File context_file;
-	File settings_file;
-	
-	
+	private File context_file;
+	private File settings_file;
+
 	/** Constructor **/
 	State() {
 		context_file = new File("/State", "context_file.ser");
 		settings_file = new File("/State", "settings_file.ser");
 	}
-	
-	
+
 	/** Methods **/
+
+	/**
+	 * Settings and Context are persistently saved in a .ser file.
+	 *
+	 * @param settings
+	 * @param context
+	 */
 	public void save(Settings settings, Context context) {
 
-		try{
-			
-			//saves context
+		try {
 			FileOutputStream fos = new FileOutputStream("context_file.ser");
 			ObjectOutputStream oos = new ObjectOutputStream(fos);
 			oos.writeObject(context);
-			
-			//saves settings
+
 			fos = new FileOutputStream("settings_file.ser");
 			oos = new ObjectOutputStream(fos);
 			oos.writeObject(settings);
 			
 			oos.close();
-
 		}
 		catch(IOException e) {
 			e.printStackTrace();
 		}
-
 	}
-	
-	// loads context file and returns context object
+
+	/**
+	 * Loads the previously saved Context with the configuration.
+	 * If no Context was found a new one will be created.
+	 *
+ 	 * @return Context
+	 */
 	public Context loadContext() {
 		
 		Context context;
@@ -80,14 +92,17 @@ public class State {
 			System.out.println("New context has been created.");
 			return new Context();
 		}
-		
-		
-		return context;
 
+		return context;
 	}
-	
-	
-	// loads settings file and returns Settings object
+
+
+	/**
+	 * Loads the previously saved Settings with the configuration.
+	 * If no Settings was found a new one will be created.
+	 *
+	 * @return Settings
+	 */
 	public Settings loadSettings() {
 		
 		Settings settings;
@@ -108,8 +123,5 @@ public class State {
 		}
 		
 		return settings;
-
 	}
-
-	
 }
