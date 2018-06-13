@@ -46,16 +46,34 @@ public class Lucene {
 	/** CONSTRUCTOR **/
 	public Lucene() {
 		try {
-			File file = new File("./dict/German/indexDirectory");
+			File directory = new File("./dict/German/indexDirectory");
 
-			if(file.isDirectory()) {
+			if(directory.isDirectory()) {
 
-				if (file.list().length > 0) {
+				if (directory.list().length != 11) {//11 files are created and used for indexing
+					//start indexing
+					System.out.println("Start indexing");
+
+					//delete all files in folder to avoid corrupt/outdated files
+					File[] files = directory.listFiles(); // get all files in directory
+					//delete all files
+					for(File file : files)
+					{
+						if(!file.delete())
+						{
+							System.out.println("Failed to delete file");
+						}
+						else
+							System.out.println("Success to delete file");
+					}
+
 					createIndex();
+					System.out.println("Indexing done");
+				}
+				else{
+					System.out.println("Already indexed");
 				}
 			}
-
-			createIndex();
 		}
 		catch (IOException e) {
 			e.printStackTrace();
@@ -158,6 +176,8 @@ public class Lucene {
 
 	private ArrayList<String> searchIndex(String ww) throws IOException, ParseException {
 		ArrayList<String> results = new ArrayList<String>();
+		analyzer = new StandardAnalyzer();
+		directory = FSDirectory.open(Paths.get("./dict/German/indexDirectory"));
 		
 		/* this currently returns all hits for "cat" and "flap", instead of "cat flap".
 		 * To accomplish best results, we would have to search for the phrase "| cat flap "

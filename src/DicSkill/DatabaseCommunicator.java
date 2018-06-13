@@ -54,16 +54,17 @@ public class DatabaseCommunicator {
 	/**
 	 * VARIABlES
 	 **/
-	private RiWordNet RitaDB;
+	private RiWordNet ritaDB;
 	private String pos;                // Rita specific: PartsOfSpeach. e.g.: noun, adjective, verb ...
-
+	private Lucene lucene;
 	/**
 	 * Constructor
 	 **/
 	public DatabaseCommunicator() {
 
-		RitaDB = new RiWordNet("./dict/English/");
+		ritaDB = new RiWordNet("./dict/English/");
 		pos = null;
+		lucene = new Lucene();
 	}
 
 	/**
@@ -74,7 +75,7 @@ public class DatabaseCommunicator {
 	 * Shortens the Array to fit the NOW. If the output size is smaller,
 	 * the NOW will be ignored.
 	 *
-	 * @param dbOutput
+	 * @param dbOutput result of query which is supposed to be worked with
 	 * @return String[] shortened Array
 	 */
 	private String[] extractArray(String dbOutput[], int NOW) {
@@ -99,16 +100,17 @@ public class DatabaseCommunicator {
 	 * ---WIP--- Translate provides the translation to the wished word
 	 *
 	 * @param ww  wishedWord
-	 * @param NOW numberOfWords
+	 * @param nOW numberOfWords
 	 * @return String[] databaseOutput[]
 	 */
-	public String[] translate(String ww, int NOW) {
+	public String[] translate(String ww, int nOW) {
 
-		String result[] = null;
+		String results[] = null;
 
+		results = lucene.translate(ww, nOW);
 		// Lucene s job
 
-		return result;
+		return results;
 	}
 
 	/**
@@ -116,21 +118,21 @@ public class DatabaseCommunicator {
 	 * Rita offers several definitions, the first one seems to be the best.
 	 *
 	 * @param ww  wishedWord
-	 * @param NOW numberOfWords
+	 * @param nOW numberOfWords
 	 * @return String[] databaseOutput[]
 	 */
-	public String[] define(String ww, int NOW) {
+	public String[] define(String ww, int nOW) {
 
-		if (!RitaDB.exists(ww)) {
+		if (!ritaDB.exists(ww)) {
 			return null;
 		}
 
 		String result[];
 
-		pos = RitaDB.getBestPos(ww);
-		result = RitaDB.getAllGlosses(ww, pos);
+		pos = ritaDB.getBestPos(ww);
+		result = ritaDB.getAllGlosses(ww, pos);
 
-		result = extractArray(result, NOW);
+		result = extractArray(result, nOW);
 
 		return result;
 	}
@@ -142,21 +144,21 @@ public class DatabaseCommunicator {
 	 * (WordNet does not seem to have a lot of synonyms).
 	 *
 	 * @param ww  wishedWord
-	 * @param NOW numberOfWords
+	 * @param nOW numberOfWords
 	 * @return String[] databaseOutput[]
 	 */
-	public String[] giveSynonyms(String ww, int NOW) {
+	public String[] giveSynonyms(String ww, int nOW) {
 
-		if (!RitaDB.exists(ww)) {
+		if (!ritaDB.exists(ww)) {
 			return null;
 		}
 
 		String result[];
 
-		pos = RitaDB.getBestPos(ww);
-		result = RitaDB.getAllSimilar(ww, pos);
+		pos = ritaDB.getBestPos(ww);
+		result = ritaDB.getAllSimilar(ww, pos);
 
-		result = extractArray(result, NOW);
+		result = extractArray(result, nOW);
 
 		return result;
 	}
@@ -165,21 +167,21 @@ public class DatabaseCommunicator {
 	 * GiveExamples provides an example to the wished word.
 	 *
 	 * @param ww  wishedWord
-	 * @param NOW numberOfWords
+	 * @param nOW numberOfWords
 	 * @return String[] databaseOutput[]
 	 */
-	public String[] giveExamples(String ww, int NOW) {
+	public String[] giveExamples(String ww, int nOW) {
 
-		if (!RitaDB.exists(ww)) {
+		if (!ritaDB.exists(ww)) {
 			return null;
 		}
 
 		String result[];
 
-		pos = RitaDB.getBestPos(ww);
-		result = RitaDB.getAllExamples(ww, pos);
+		pos = ritaDB.getBestPos(ww);
+		result = ritaDB.getAllExamples(ww, pos);
 
-		result = extractArray(result, NOW);
+		result = extractArray(result, nOW);
 
 		return result;
 	}
@@ -207,17 +209,17 @@ public class DatabaseCommunicator {
 	 * Returns words that start with [letters]
 	 *
 	 * @param letters the word starts with
-	 * @param NOW     numberOfWords
+	 * @param nOW     numberOfWords
 	 * @return String[] result
 	 */
-	public String[] scrabble_start(String letters, int NOW) {
+	public String[] scrabble_start(String letters, int nOW) {
 
 		String result[];
 
-		pos = RitaDB.getBestPos(letters);
-		result = RitaDB.getStartsWith(letters, pos, NOW);
+		pos = ritaDB.getBestPos(letters);
+		result = ritaDB.getStartsWith(letters, pos, nOW);
 
-		result = extractArray(result, NOW);
+		result = extractArray(result, nOW);
 
 		return result;
 	}
@@ -226,17 +228,17 @@ public class DatabaseCommunicator {
 	 * returns words that ends with [letters]
 	 *
 	 * @param letters the word starts with
-	 * @param NOW     numberOfWords
+	 * @param nOW     numberOfWords
 	 * @return String[] result
 	 */
-	public String[] scrabble_end(String letters, int NOW) {
+	public String[] scrabble_end(String letters, int nOW) {
 
 		String result[];
 
-		pos = RitaDB.getBestPos(letters);
-		result = RitaDB.getEndsWith(letters, pos, NOW);
+		pos = ritaDB.getBestPos(letters);
+		result = ritaDB.getEndsWith(letters, pos, nOW);
 
-		result = extractArray(result, NOW);
+		result = extractArray(result, nOW);
 
 		return result;
 	}
@@ -245,17 +247,17 @@ public class DatabaseCommunicator {
 	 * returns words that contains [letters]
 	 *
 	 * @param letters the word starts with
-	 * @param NOW     numberOfWords
+	 * @param nOW     numberOfWords
 	 * @return String[] result
 	 */
-	public String[] scrabble_contain(String letters, int NOW) {
+	public String[] scrabble_contain(String letters, int nOW) {
 
 		String result[];
 
-		pos = RitaDB.getBestPos(letters);
-		result = RitaDB.getContains(letters, pos, NOW);
+		pos = ritaDB.getBestPos(letters);
+		result = ritaDB.getContains(letters, pos, nOW);
 
-		result = extractArray(result, NOW);
+		result = extractArray(result, nOW);
 
 		return result;
 	}
