@@ -38,14 +38,12 @@ public class DictionarySkill {
 		
 		System.out.println("Hello! How may I help you?");
 		
-		msg = read.nextLine();
-		msg.toLowerCase();
+		msg = read.nextLine().toLowerCase();
 		
 		while(!msg.equals("bye"))
 		{
 			System.out.println( tb.decodeMsg(msg, settings, dbC, context, lucene) );
-			msg = read.nextLine();
-			msg.toLowerCase();
+			msg = read.nextLine().toLowerCase();
 		}
 		
 		state.save(settings, context); // saves the updated context

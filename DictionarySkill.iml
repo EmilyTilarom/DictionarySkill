@@ -11,15 +11,6 @@
     <orderEntry type="module-library">
       <library>
         <CLASSES>
-          <root url="jar://$MODULE_DIR$/dict/rita.jar!/" />
-        </CLASSES>
-        <JAVADOC />
-        <SOURCES />
-      </library>
-    </orderEntry>
-    <orderEntry type="module-library">
-      <library>
-        <CLASSES>
           <root url="jar://$MODULE_DIR$/dict/lucene-7.3.0/core/lucene-core-7.3.0.jar!/" />
         </CLASSES>
         <JAVADOC />
@@ -53,7 +44,6 @@
         <SOURCES />
       </library>
     </orderEntry>
-    <orderEntry type="library" name="rita (2)" level="project" />
     <orderEntry type="library" name="edu.mit.jwi_2.4.0" level="project" />
   </component>
 </module>

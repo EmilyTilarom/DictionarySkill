@@ -62,7 +62,7 @@ public class DatabaseCommunicator {
 	 **/
 	public DatabaseCommunicator() {
 
-		RitaDB = new RiWordNet("dict/");
+		RitaDB = new RiWordNet("./dict/English/");
 		pos = null;
 	}
 

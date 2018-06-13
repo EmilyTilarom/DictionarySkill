@@ -117,7 +117,7 @@ public class MessageManager {
 		
 		// WHAT CAN YOU DO?
 		keywords_whatCanYouDo = new ArrayList<String>();
-		keywords_whatCanYouDo.add("What can you do");
+		keywords_whatCanYouDo.add("what can you do");
 		
 		// CHANGE PREFERRED CATEGORIES
 		keywords_changePrefCat = new ArrayList<String>();
