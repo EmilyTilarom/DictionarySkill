@@ -98,7 +98,7 @@ public class DatabaseCommunicator {
 	/**
 	 * ---WIP--- Translate provides the translation to the wished word
 	 *
-	 * @param ww  wishedWord
+	 * @param ww  wishedWor
 	 * @param NOW numberOfWords
 	 * @return String[] databaseOutput[]
 	 */

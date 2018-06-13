@@ -41,7 +41,7 @@ public class DictionarySkill {
 		
 		while(!msg.equals("bye"))
 		{
-			System.out.println( tb.decodeMsg(msg, settings, dbC, context, lucene) );
+			System.out.println( tb.decodeMsg(msg, settings, dbC, context) );
 			msg = read.nextLine().toLowerCase();
 
 		}
