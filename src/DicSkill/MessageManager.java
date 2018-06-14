@@ -91,6 +91,7 @@ public class MessageManager {
 		
 		// SYNONYMS
 		keywords_synonyms = new ArrayList<String>();
+		keywords_synonyms.add("synonym");
 		keywords_synonyms.add("synonyms");
 		
 		// SCRABBLE START WITH
@@ -460,11 +461,13 @@ public class MessageManager {
 	 * The trail after the wished word will be removed.
 	 * This includes spaces and unnecessary words.
 	 *
+	 * If the ww is empty, null will be returned.
+	 *
 	 * @param ww wished word
 	 * @return String shortened wished word
 	 */
 	public String shortenWishedWord(String ww) {
-		
+
 		int shortenPosTo = ww.length();
 		
 		// finds the position of the first " " starting from the end/right of the ww

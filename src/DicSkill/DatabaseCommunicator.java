@@ -81,6 +81,10 @@ public class DatabaseCommunicator {
 
 		String[] returnArray;
 
+		if(NOW < 0) {
+			return null;
+		}
+
 		if(NOW < dbOutput.length) {
 			returnArray = new String[NOW];
 		}
@@ -98,7 +102,7 @@ public class DatabaseCommunicator {
 	/**
 	 * ---WIP--- Translate provides the translation to the wished word
 	 *
-	 * @param ww  wishedWord
+	 * @param ww  wishedWor
 	 * @param NOW numberOfWords
 	 * @return String[] databaseOutput[]
 	 */
