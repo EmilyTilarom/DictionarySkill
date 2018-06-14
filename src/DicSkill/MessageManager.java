@@ -332,7 +332,8 @@ public class MessageManager {
 	}
 
 	/**
-	 * Finds and returns the wished word in the message.
+	 * Finds and returns the wished word in the message. Everything after the function keyword will be the wished word
+     * until further change in shortenWishedWord. Example output: (define) "apple juice please"
 	 *
 	 * If there is no (new) wished word the last used wished word will be used.
 	 * In this case Context will be called.
@@ -462,10 +463,11 @@ public class MessageManager {
 	}
 
 	/**
-	 * The trail after the wished word will be removed.
-	 * This includes spaces and unnecessary words.
+	 * If the wished word consists of multiple words ( e.g: apple juice please.),
+     * decodeMessage starts multiple queries. This function shortens the wished word, one word at a time.
+     * Thus an adequat match can be found.
 	 *
-	 * If the ww is empty, null will be returned.
+	 * If the ww is empty, null will be returned. If shortenPosTo is too small, null will be returned too.
 	 *
 	 * @param ww wished word
 	 * @return String shortened wished word
@@ -479,7 +481,7 @@ public class MessageManager {
 			shortenPosTo--;
 		}
 
-		if(shortenPosTo == 1 || shortenPosTo == ww.length()) {
+		if(shortenPosTo < 1 || shortenPosTo == ww.length()) {
 			return null;
 		}
 		else {
