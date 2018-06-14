@@ -6,7 +6,14 @@ public class MainTest {
 
         DatabaseCommunicatorTest dcT = new DatabaseCommunicatorTest();
 
+        // dcT.translate();
         dcT.define();
+        dcT.giveExamples();
+        dcT.giveSynonyms();
+        dcT.spell();
+        dcT.scrabble_start();
+        dcT.scrabble_end();
+
 
     }
 }

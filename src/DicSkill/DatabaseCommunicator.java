@@ -81,6 +81,10 @@ public class DatabaseCommunicator {
 
 		String[] returnArray;
 
+		if(NOW < 0) {
+			return null;
+		}
+
 		if(NOW < dbOutput.length) {
 			returnArray = new String[NOW];
 		}
