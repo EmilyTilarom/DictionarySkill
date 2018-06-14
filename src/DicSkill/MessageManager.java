@@ -466,7 +466,7 @@ public class MessageManager {
 	 * @param ww wished word
 	 * @return String shortened wished word
 	 */
-	public String shortenWishedWord(String ww) {
+	private String shortenWishedWord(String ww) {
 
 		int shortenPosTo = ww.length();
 		

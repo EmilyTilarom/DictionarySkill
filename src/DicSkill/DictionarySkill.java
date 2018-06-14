@@ -31,10 +31,10 @@ public class DictionarySkill {
 		Settings settings = state.loadSettings(); // loads settings. If no settings is found, creates new one.
 		MessageManager tb = new MessageManager();
 		DatabaseCommunicator dbC = new DatabaseCommunicator();
-		
+
 		String msg = "";
 		Scanner read = new Scanner(System.in);
-		
+
 		System.out.println("Hello! How may I help you?");
 		
 		msg = read.nextLine().toLowerCase();

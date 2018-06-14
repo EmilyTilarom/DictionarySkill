@@ -1,6 +1,17 @@
 package DicSkill;
 
 /**
+ * 14.06.2018
+ * TO DO:
+ * - After recieving output, evaluate it according to preffered category
+ * NEW:
+ * - Implemented function translate together with lucene
+ *
+ * @author Walter
+ *
+ */
+
+/**
  * 01.06.2018
  * TO DO:
  * - Implement Lucene to implement translate
@@ -47,7 +58,7 @@ import rita.RiWordNet;
  *
  * Used databases with API:
  *  - WordNet database with Rita
- *  - (Lucene)
+ *  - Lucene
  */
 public class DatabaseCommunicator {
 
@@ -55,6 +66,7 @@ public class DatabaseCommunicator {
 	 * VARIABlES
 	 **/
 	private RiWordNet RitaDB;
+	private Lucene lucene;
 	private String pos;                // Rita specific: PartsOfSpeach. e.g.: noun, adjective, verb ...
 
 	/**
@@ -63,6 +75,7 @@ public class DatabaseCommunicator {
 	public DatabaseCommunicator() {
 
 		RitaDB = new RiWordNet("./dict/English/");
+		lucene = new Lucene();
 		pos = null;
 	}
 
@@ -110,7 +123,8 @@ public class DatabaseCommunicator {
 
 		String result[] = null;
 
-		// Lucene s job
+		result = lucene.translate(ww, NOW);
+		result = extractArray(result, NOW);
 
 		return result;
 	}
