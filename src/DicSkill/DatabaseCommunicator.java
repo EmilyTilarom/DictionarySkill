@@ -55,6 +55,7 @@ public class DatabaseCommunicator {
 	 * VARIABlES
 	 **/
 	private RiWordNet RitaDB;
+	private Lucene lucene;
 	private String pos;                // Rita specific: PartsOfSpeach. e.g.: noun, adjective, verb ...
 
 	/**
@@ -63,6 +64,7 @@ public class DatabaseCommunicator {
 	public DatabaseCommunicator() {
 
 		RitaDB = new RiWordNet("./dict/English/");
+		lucene = new Lucene();
 		pos = null;
 	}
 
@@ -110,7 +112,8 @@ public class DatabaseCommunicator {
 
 		String result[] = null;
 
-		// Lucene s job
+		result = lucene.translate(ww, NOW);
+		result = extractArray(result, NOW);
 
 		return result;
 	}

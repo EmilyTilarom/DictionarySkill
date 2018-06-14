@@ -400,7 +400,11 @@ public class MessageManager {
 	 * @return String the final message for the user
 	 */
 	private String createMsg(Context context, String result) {
-		
+
+	    if(result == null) {
+	        return "Sorry, we did not find any entry matching your query";
+        }
+
 		switch(context.getLastFunctionUsed()) {
 			case TRANSLATION: 
 				return "The translation of " + context.getLastWishedWord() + " is " + result;
