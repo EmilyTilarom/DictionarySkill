@@ -32,7 +32,7 @@ import java.io.ObjectOutputStream;
 
 public class State {
 	
-	/** VARIABlES **/
+	/** VARIABLES **/
 	private File context_file;
 	private File settings_file;
 
