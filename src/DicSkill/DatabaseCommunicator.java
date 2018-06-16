@@ -1,10 +1,22 @@
 package DicSkill;
 
 /**
+ * 15.06.2018
+ * TO DO:
+ * - After receiving output, evaluate it according to preferred category
+ * NEW:
+ * - Added Lucene and function translation
+ * - Bug fixes
+ *
+ * @author Walter
+ *
+ */
+
+/**
  * 01.06.2018
  * TO DO:
  * - Implement Lucene to implement translate
- * - After recieving output, evaluate it according to preffered category
+ * - After receiving output, evaluate it according to preferred category
  * NEW:
  * - Added function example.
  * - Fixed a couple of bugs concerning ArraySize.
@@ -43,27 +55,29 @@ import rita.RiWordNet;
 
 /**
  * DatabaseCommunicator gets function specific calls. The databases will be searched accordingly
- * and the result will be extracted. Then the answer will be returned to the Messagemanager.
+ * and the result will be extracted. Then the answer will be returned to the MessageManager.
+ *
+ * If there is no answer or an empty answer, null will be returned for every function.
  *
  * Used databases with API:
  *  - WordNet database with Rita
- *  - (Lucene)
+ *  - Lucene
  */
 public class DatabaseCommunicator {
 
 	/**
-	 * VARIABlES
+	 * VARIABLES
 	 **/
-	private RiWordNet RitaDB;
-	private Lucene lucene;
-	private String pos;                // Rita specific: PartsOfSpeach. e.g.: noun, adjective, verb ...
+	private final RiWordNet ritaDB;
+	private final Lucene lucene;
+	private String pos;                // Rita specific: PartsOfSpeech. e.g.: noun, adjective, verb ...
 
 	/**
 	 * Constructor
 	 **/
 	public DatabaseCommunicator() {
 
-		RitaDB = new RiWordNet("./dict/English/");
+		ritaDB = new RiWordNet("./dict/English/");
 		lucene = new Lucene();
 		pos = null;
 	}
@@ -75,15 +89,25 @@ public class DatabaseCommunicator {
 	/**
 	 * Shortens the Array to fit the NOW. If the output size is smaller,
 	 * the NOW will be ignored.
+	 * If the query did not provide an answer or an empty array null will be returned.
 	 *
-	 * @param dbOutput
+	 * @param dbOutput answer of the database
 	 * @return String[] shortened Array
 	 */
 	private String[] extractArray(String dbOutput[], int NOW) {
 
+		if(dbOutput == null) {
+			return null;
+		}
+		else {
+			if(dbOutput.length == 0) {
+				return null;
+			}
+		}
+
 		String[] returnArray;
 
-		if(NOW < 0) {
+		if(NOW <= 0) {
 			return null;
 		}
 
@@ -94,9 +118,7 @@ public class DatabaseCommunicator {
 			returnArray = new String[dbOutput.length];
 		}
 
-		for (int i=0; i < returnArray.length; i++) {
-			returnArray[i] = dbOutput[i];
-		}
+		System.arraycopy(dbOutput, 0, returnArray, 0, returnArray.length);
 
 		return returnArray;
 	}
@@ -110,7 +132,7 @@ public class DatabaseCommunicator {
 	 */
 	public String[] translate(String ww, int NOW) {
 
-		String result[] = null;
+		String result[];
 
 		result = lucene.translate(ww, NOW);
 		result = extractArray(result, NOW);
@@ -128,14 +150,14 @@ public class DatabaseCommunicator {
 	 */
 	public String[] define(String ww, int NOW) {
 
-		if (!RitaDB.exists(ww)) {
+		if (!ritaDB.exists(ww)) {
 			return null;
 		}
 
 		String result[];
 
-		pos = RitaDB.getBestPos(ww);
-		result = RitaDB.getAllGlosses(ww, pos);
+		pos = ritaDB.getBestPos(ww);
+		result = ritaDB.getAllGlosses(ww, pos);
 
 		result = extractArray(result, NOW);
 
@@ -154,14 +176,14 @@ public class DatabaseCommunicator {
 	 */
 	public String[] giveSynonyms(String ww, int NOW) {
 
-		if (!RitaDB.exists(ww)) {
+		if (!ritaDB.exists(ww)) {
 			return null;
 		}
 
 		String result[];
 
-		pos = RitaDB.getBestPos(ww);
-		result = RitaDB.getAllSimilar(ww, pos);
+		pos = ritaDB.getBestPos(ww);
+		result = ritaDB.getAllSimilar(ww, pos);
 
 		result = extractArray(result, NOW);
 
@@ -177,15 +199,15 @@ public class DatabaseCommunicator {
 	 */
 	public String[] giveExamples(String ww, int NOW) {
 
-		if (!RitaDB.exists(ww)) {
+		if (!ritaDB.exists(ww)) {
 			return null;
 		}
 
 		String result[];
 
-		pos = RitaDB.getBestPos(ww);
-		result = RitaDB.getAllExamples(ww, pos);
+		pos = ritaDB.getBestPos(ww);
 
+		result = ritaDB.getAllExamples(ww, pos);
 		result = extractArray(result, NOW);
 
 		return result;
@@ -221,8 +243,8 @@ public class DatabaseCommunicator {
 
 		String result[];
 
-		pos = RitaDB.getBestPos(letters);
-		result = RitaDB.getStartsWith(letters, pos, NOW);
+		pos = ritaDB.getBestPos(letters);
+		result = ritaDB.getStartsWith(letters, pos, NOW);
 
 		result = extractArray(result, NOW);
 
@@ -240,8 +262,8 @@ public class DatabaseCommunicator {
 
 		String result[];
 
-		pos = RitaDB.getBestPos(letters);
-		result = RitaDB.getEndsWith(letters, pos, NOW);
+		pos = ritaDB.getBestPos(letters);
+		result = ritaDB.getEndsWith(letters, pos, NOW);
 
 		result = extractArray(result, NOW);
 
@@ -259,8 +281,8 @@ public class DatabaseCommunicator {
 
 		String result[];
 
-		pos = RitaDB.getBestPos(letters);
-		result = RitaDB.getContains(letters, pos, NOW);
+		pos = ritaDB.getBestPos(letters);
+		result = ritaDB.getContains(letters, pos, NOW);
 
 		result = extractArray(result, NOW);
 

@@ -4,11 +4,21 @@ import java.util.ArrayList;
 import java.util.Iterator;
 
 /**
+ * 15.06.2018
+ * TO DO:
+ * -	consider category in code? -> in DatabaseCommunicator?
+ * NEW:
+ * -	bug fixes
+ * @author Walter, Adrian
+ */
+
+/**
  * 10.06.2018
  * TO DO:
  * -	consider category in code? -> in DatabaseCommunicator?
  * NEW:
  * -	documentation improved
+ * -	bug fixes
  * @author Walter
  */
 
@@ -54,7 +64,7 @@ import java.util.Iterator;
  */
 public class MessageManager {
 	
-	/** VARIABlES **/
+	/** VARIABLES **/
     // Keywords define which function will be called.
 	private ArrayList<String> keywords_translation;
 	private ArrayList<String> keywords_definition;
@@ -68,8 +78,6 @@ public class MessageManager {
 	private ArrayList<String> keywords_setting;
 	private ArrayList<String> keywords_whatCanYouDo;
 	private ArrayList<String> keywords_changePrefCat;
-
-	private int positionOfFunction;
 
 	/** Constructor **/
 	public MessageManager() {
@@ -141,6 +149,10 @@ public class MessageManager {
      * Also updates the context in the process.
 	 *
 	 * Error messages will be returned when neither a function or a wishedWord was found.
+	 *
+	 * While a result for the wished word (consisting of multiple(!) words) could not be found,
+	 * the wished word will be shortened (via shortenWishedWord()) by one word and the search for a result will be repeated.
+	 * When the wished word is null, it means that a result could not be found for the wished word.
      *
      * @param msg Message from the user
      * @param settings
@@ -149,11 +161,14 @@ public class MessageManager {
      * @return answer for the user
      */
 	public String decodeMsg(String msg, Settings settings, DatabaseCommunicator dbC, Context context) {
-		
+
+		if(msg == null) {
+			return "Sorry, I did not understand you.";
+		}
+
 		String wishedWord;
 		Function function;
 		String[] result; 		// the result received from the DatabaseCommunicator
-
 
 		wishedWord = findWishedWord(msg, context);
 		function = findFunction(msg);
@@ -161,16 +176,10 @@ public class MessageManager {
 		if(function == null)
 			return "Sorry, I don't know which function you are asking for.";
 
-		/*if(ww == null) {
-			return "Sorry, I don't know which word you're asking for.";
-		}*/
-		
+		if(wishedWord == null) {
+			return "Sorry, I did not understand you.";
+		}
 
-		/*
-		 *  While a result for the wished word (consisting of multiple(!) words) could not be found,
-		 *  the wished word will be shortened by one word and the search for a result will be repeated.
-		 *  When the wished word is null, it means that a result could not be found for the wished word.
-		 */
 		do {
 			switch(function) {
 				
@@ -185,6 +194,9 @@ public class MessageManager {
 					break;
 				case SYNONYMS:
 					result = dbC.giveSynonyms(wishedWord, settings.getNOW_synonyms());
+					break;
+				case EXAMPLE:
+					result = dbC.giveExamples(wishedWord, settings.getNOW_examples());
 					break;
 				case SCRABBLE_START:
 					result = dbC.scrabble_start(wishedWord, settings.getNOW_scrabble());
@@ -246,6 +258,7 @@ public class MessageManager {
 		
 		// translation
 		Iterator<String> translation_iterator = keywords_translation.iterator();
+		int positionOfFunction;
 		while(translation_iterator.hasNext()) {
 			String tmp = translation_iterator.next();
 			if(msg.contains(tmp)) {
@@ -327,13 +340,13 @@ public class MessageManager {
 				return Function.CHANGE_PREF_CAT;
 			}
 		}
-		
+
 		return null;
 	}
 
 	/**
 	 * Finds and returns the wished word in the message. Everything after the function keyword will be the wished word
-     * until further change in shortenWishedWord. Example output: (define) "apple juice please"
+     * until further change in shortenWishedWord(). Example output: (define) "apple juice please"
 	 *
 	 * If there is no (new) wished word the last used wished word will be used.
 	 * In this case Context will be called.
@@ -352,7 +365,7 @@ public class MessageManager {
 		 * msg.lastIndexOf the found word + the length of the word + 1
 		 * When the ww ends will still have to be taken in account later on
 		 */
-		
+
 		// *of* ; e.g. meaning/translation/spelling of
 		if(msg.contains("of")) {
 			wishedWord = msg.substring(msg.lastIndexOf("of")+3);
@@ -411,13 +424,16 @@ public class MessageManager {
 				return "The translation of " + context.getLastWishedWord() + " is " + result;
 			
 			case DEFINITION:
-				return "" + result;
+				return "The definition is " + result;
 			
 			case SPELLING:
 				return "" + context.getLastWishedWord() + " is spelled " + result;
 			
 			case SYNONYMS:
 				return "Synonyms for " + context.getLastWishedWord() + " are " + result;
+
+			case EXAMPLE:
+				return "Examples for " + context.getLastWishedWord() + " are " + result;
 			
 			case SCRABBLE_START:
 				return "Words which start with " + context.getLastWishedWord() + " are " + result;
@@ -444,6 +460,8 @@ public class MessageManager {
 	/**
 	 * All possible outputs from the array are transformed into one String.
 	 *
+	 * If there is no output null will be returned.
+	 *
 	 * @param result from the function
 	 * @return String answer
 	 */
@@ -453,31 +471,31 @@ public class MessageManager {
 			return null;
 		}
 		
-		String allResults = "";
+		StringBuilder allResults = new StringBuilder();
 
 		for(int i=0; i<result.length; i++) {
-			allResults += result[i]+" ";
+			allResults.append(result[i]).append(" ");
 		}
 		
-		return allResults;
+		return allResults.toString();
 	}
 
 	/**
 	 * If the wished word consists of multiple words ( e.g: apple juice please.),
      * decodeMessage starts multiple queries. This function shortens the wished word, one word at a time.
-     * Thus an adequat match can be found.
+     * Thus an adequate match can be found.
 	 *
 	 * If the ww is empty, null will be returned. If shortenPosTo is too small, null will be returned too.
 	 *
 	 * @param ww wished word
 	 * @return String shortened wished word
 	 */
-	public String shortenWishedWord(String ww) {
+	private String shortenWishedWord(String ww) {
 
 		int shortenPosTo = ww.length();
 		
 		// finds the position of the first " " starting from the end/right of the ww
-		while( shortenPosTo > 0 && !(ww.substring(shortenPosTo-1, shortenPosTo).equals(new String(" ")) )) {
+		while( shortenPosTo > 0 && !(ww.substring(shortenPosTo-1, shortenPosTo).equals(" ") )) {
 			shortenPosTo--;
 		}
 
@@ -485,8 +503,7 @@ public class MessageManager {
 			return null;
 		}
 		else {
-			String shortenedWishedWord = ww.substring(0, shortenPosTo-1);
-			return shortenedWishedWord;
+			return ww.substring(0, shortenPosTo-1);
 		}
 	}
 }

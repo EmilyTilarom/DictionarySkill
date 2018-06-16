@@ -12,149 +12,470 @@
 package Tests;
 
 import DicSkill.DatabaseCommunicator;
+import org.junit.After;
 import org.junit.Assert;
+import org.junit.Before;
+import org.junit.Test;
 
+
+/**
+ * These tests run multiple number of different Strings paired
+ * with multiple numbers for the expected number of outputs (now).
+ *
+ * Tests are divided between words that make sense and those that do not.
+ * Words that do not make sense or cant be found must always return null
+ * Those that make sense should return either an answer or null depending on the numberOfWords expected.
+ *
+ */
 public class DatabaseCommunicatorTest {
 
     private DatabaseCommunicator dc;
+    private String[] wishedWordsThatMakeSense;
+    private String[] wishedWordsThatMakeNOSense;
 
-    @org.junit.Test
-    public void translate() {
+    @Before
+    public void setUp() throws Exception {
 
         dc = new DatabaseCommunicator();
 
-        // WIP Waiting for lucene
+        wishedWordsThatMakeSense = new String[] {"success", "running", "certain", "apple juice"};
+        wishedWordsThatMakeNOSense = new String[] {"apple juice please", "thisWordDoesNotExist", "!?", "-.", "420", " ", "" };
     }
 
-    @org.junit.Test
-    public void define() {
+    @After
+    public void tearDown() throws Exception {
 
-        dc = new DatabaseCommunicator();
-
-        String ww = "passion";
-        String[] ar;
-
-        ar = dc.define(ww, -1);
-        Assert.assertTrue(ar == null);
-
-        ar = dc.define(ww, 0);
-        Assert.assertTrue(ar.length == 0);
-
-        ar = dc.define(ww, 1);
-        Assert.assertTrue(ar[0] != null);
-
-        ar = dc.define(ww, 100);
-        Assert.assertTrue(ar[2] != null);
+        dc = null;
+        wishedWordsThatMakeSense = null;
+        wishedWordsThatMakeNOSense = null;
     }
 
-    @org.junit.Test
-    public void giveSynonyms() {
 
-        dc = new DatabaseCommunicator();
+    @Test
+    public void testTranslateForWishedWordsThatMakeSense() {
 
-        String ww = "certain";
-        String[] ar;
+        wishedWordsThatMakeSense = new String[] {"success", "running", "certain", "apple juice"};
 
-        ar = dc.giveSynonyms(ww, -1);
-        Assert.assertTrue(ar == null);
+        String[] result;
 
-        ar = dc.giveSynonyms(ww, 0);
-        Assert.assertTrue(ar.length == 0);
+        for (String ww: wishedWordsThatMakeSense) {
 
-        ar = dc.giveSynonyms(ww, 1);
-        Assert.assertTrue(ar[0] != null);
+            result = dc.translate(ww, -1);
+            Assert.assertNull(result);
 
-        ar = dc.giveSynonyms(ww, 100);
-        Assert.assertTrue(ar[2] != null);
-    }
+            result = dc.translate(ww, 0);
+            Assert.assertNull(result);
 
-    @org.junit.Test
-    public void giveExamples() {
+            result = dc.translate(ww, 1);
+            Assert.assertNotNull(result[0]);
 
-        dc = new DatabaseCommunicator();
-
-        String ww = "trust";
-        String[] ar;
-
-        ar = dc.giveExamples(ww, -1);
-        Assert.assertTrue(ar == null);
-
-        ar = dc.giveExamples(ww, 0);
-        Assert.assertTrue(ar.length == 0);
-
-        ar = dc.giveExamples(ww, 1);
-        Assert.assertTrue(ar[0] != null);
-
-        ar = dc.giveExamples(ww, 100);
-        Assert.assertTrue(ar[2] != null);
+            result = dc.translate(ww, 100);
+            Assert.assertNotNull(result[0]);
+        }
 
     }
 
-    @org.junit.Test
-    public void spell() {
+    @Test
+    public void testTranslateForWishedWordsThatDoNotMakeSense() {
 
-        dc = new DatabaseCommunicator();
+        wishedWordsThatMakeNOSense = new String[] {"apple juice please", "thisWordDoesNotExist", "!?", "-.", "420", " ", "" };
 
-        String ww = "success";
-        String[] ar;
+        String[] result;
 
-        ar = dc.spell(ww);
-        Assert.assertTrue(ar[0] != null);
-        Assert.assertTrue(ar[6] != null);
-        Assert.assertTrue(ar.length == ww.length());
+        for (String ww: wishedWordsThatMakeNOSense) {
+
+            result = dc.translate(ww, -1);
+            Assert.assertNull(result);
+
+            result = dc.translate(ww, 0);
+            Assert.assertNull(result);
+
+            result = dc.translate(ww, 1);
+            Assert.assertNull(result);
+
+            result = dc.translate(ww, 100);
+            Assert.assertNull(result);
+        }
+
     }
 
-    @org.junit.Test
-    public void scrabble_start() {
+    @Test
+    public void testDefineForWishedWordsThatMakeSense() {
 
-        dc = new DatabaseCommunicator();
+        wishedWordsThatMakeSense = new String[] {"success", "running", "certain", "apple juice"};
 
-        String ww = "cat";
-        String[] ar;
+        String[] result;
 
-        ar = dc.scrabble_start(ww, -1);
-        Assert.assertTrue(ar == null);
+        for (String ww: wishedWordsThatMakeSense) {
 
-        ar = dc.scrabble_start(ww, 1);
-        Assert.assertTrue(ar[0].contains("cat"));
+            result = dc.define(ww, -1);
+            Assert.assertNull(result);
 
-        ar = dc.scrabble_start(ww, 100);
-        Assert.assertTrue(ar[2].contains("cat"));
+            result = dc.define(ww, 0);
+            Assert.assertNull(result);
+
+            result = dc.define(ww, 1);
+            Assert.assertNotNull(result[0]);
+
+            result = dc.define(ww, 100);
+            Assert.assertNotNull(result[0]);
+        }
+
     }
 
-    @org.junit.Test
-    public void scrabble_end() {
+    @Test
+    public void testDefineForWishedWordsThatDoNotMakeSense() {
 
-        dc = new DatabaseCommunicator();
+        wishedWordsThatMakeNOSense = new String[] {"apple juice please", "thisWordDoesNotExist", "!?", "-.", "420", " ", "" };
 
-        String ww = "sea";
-        String[] ar;
+        String[] result;
 
-        ar = dc.scrabble_end(ww, -1);
-        Assert.assertTrue(ar == null);
+        for (String ww: wishedWordsThatMakeNOSense) {
 
-        ar = dc.scrabble_start(ww, 1);
-        Assert.assertTrue(ar[0].contains("sea"));
+            result = dc.define(ww, -1);
+            Assert.assertNull(result);
 
-        ar = dc.scrabble_start(ww, 100);
-        Assert.assertTrue(ar[2].contains("sea"));
+            result = dc.define(ww, 0);
+            Assert.assertNull(result);
+
+            result = dc.define(ww, 1);
+            Assert.assertNull(result);
+
+            result = dc.define(ww, 100);
+            Assert.assertNull(result);
+        }
+
     }
 
-    @org.junit.Test
-    public void scrabble_contain() {
+    /**
+     * There are only a certain number of synonyms in the WordNet database.
+     * Thus wishedWordsThatMakeSense has to be adapted.
+     * Tests for these are in the lower loop.
+     */
+    @Test
+    public void testSynonymsForWishedWordsThatMakeSense() {
 
-        dc = new DatabaseCommunicator();
+        wishedWordsThatMakeSense = new String[] {"certain", "true", "happy"};
 
-        String ww = "sea";
-        String[] ar;
+        String[] result;
 
-        ar = dc.scrabble_contain(ww, -1);
-        Assert.assertTrue(ar == null);
+        for (String ww: wishedWordsThatMakeSense) {
 
-        ar = dc.scrabble_contain(ww, 1);
-        Assert.assertTrue(ar[0].contains("sea"));
+            result = dc.giveSynonyms(ww, -1);
+            Assert.assertNull(result);
 
-        ar = dc.scrabble_contain(ww, 100);
-        Assert.assertTrue(ar[2].contains("sea"));
+            result = dc.giveSynonyms(ww, 0);
+            Assert.assertNull(result);
+
+            result = dc.giveSynonyms(ww, 1);
+            Assert.assertNotNull(result[0]);
+
+            result = dc.giveSynonyms(ww, 100);
+            Assert.assertNotNull(result[0]);
+        }
+
+        wishedWordsThatMakeSense = new String[] {"walking", "love"};
+
+        for (String ww: wishedWordsThatMakeSense) {
+
+            result = dc.giveSynonyms(ww, -1);
+            Assert.assertNull(result);
+
+            result = dc.giveSynonyms(ww, 0);
+            Assert.assertNull(result);
+
+            result = dc.giveSynonyms(ww, 1);
+            Assert.assertNull(result);
+
+            result = dc.giveSynonyms(ww, 100);
+            Assert.assertNull(result);
+        }
+
+    }
+
+    @Test
+    public void testSynonymsForWishedWordsThatDoNotMakeSense() {
+
+        wishedWordsThatMakeNOSense = new String[] {"apple juice please", "thisWordDoesNotExist", "!?", "-.", "420", " ", "" };
+
+        String[] result;
+
+        for (String ww: wishedWordsThatMakeNOSense) {
+
+            result = dc.giveSynonyms(ww, -1);
+            Assert.assertNull(result);
+
+            result = dc.giveSynonyms(ww, 0);
+            Assert.assertNull(result);
+
+            result = dc.giveSynonyms(ww, 1);
+            Assert.assertNull(result);
+
+            result = dc.giveSynonyms(ww, 100);
+            Assert.assertNull(result);
+        }
+
+    }
+
+    /**
+     * There are no examples for words consisting of multiple words.
+     * Thus wishedWordsThatMakeSense has to be adapted.
+     * Tests for these are in the lower loop.
+     */
+    @Test
+    public void testExamplesForWishedWordsThatMakeSense() {
+
+        wishedWordsThatMakeSense = new String[] {"success", "running", "certain"};
+
+        String[] result;
+
+        for (String ww: wishedWordsThatMakeSense) {
+
+            result = dc.giveExamples(ww, -1);
+            Assert.assertNull(result);
+
+            result = dc.giveExamples(ww, 0);
+            Assert.assertNull(result);
+
+            result = dc.giveExamples(ww, 1);
+            Assert.assertNotNull(result[0]);
+
+            result = dc.giveExamples(ww, 100);
+            Assert.assertNotNull(result[0]);
+        }
+
+        wishedWordsThatMakeSense = new String[] {"apple juice"};
+
+        for (String ww: wishedWordsThatMakeSense) {
+
+            result = dc.giveExamples(ww, -1);
+            Assert.assertNull(result);
+
+            result = dc.giveExamples(ww, 0);
+            Assert.assertNull(result);
+
+            result = dc.giveExamples(ww, 1);
+            Assert.assertNull(result);
+
+            result = dc.giveExamples(ww, 100);
+            Assert.assertNull(result);
+        }
+    }
+
+    @Test
+    public void testExamplesForWishedWordsThatDoNotMakeSense() {
+
+        wishedWordsThatMakeNOSense = new String[] {"apple juice please", "thisWordDoesNotExist", "!?", "-.", "420", " ", "" };
+
+        String[] result;
+
+        for (String ww: wishedWordsThatMakeNOSense) {
+
+            result = dc.giveExamples(ww, -1);
+            Assert.assertNull(result);
+
+            result = dc.giveExamples(ww, 0);
+            Assert.assertNull(result);
+
+            result = dc.giveExamples(ww, 1);
+            Assert.assertNull(result);
+
+            result = dc.giveExamples(ww, 100);
+            Assert.assertNull(result);
+        }
+
+    }
+
+
+    @Test
+    public void testSpellForWishedWordsThatMakeSense() {
+
+        wishedWordsThatMakeSense = new String[] {"success", "running", "certain", "apple juice"};
+
+        String[] result;
+
+        for (String ww: wishedWordsThatMakeSense) {
+
+            result = dc.spell(ww);
+            Assert.assertNotNull(result[0]);
+            Assert.assertNotNull(result[ww.length()-1]);
+            Assert.assertEquals(result.length, ww.length());
+        }
+
+    }
+
+    @Test
+    public void testSpellForWishedWordsThatDoNotMakeSense() {
+
+        wishedWordsThatMakeNOSense = new String[] {"apple juice please", "thisWordDoesNotExist", "!?", "-.", "420", " ", "" };
+
+        String[] result;
+
+        for (String ww: wishedWordsThatMakeNOSense) {
+
+            result = dc.spell(ww);
+            Assert.assertNotNull(result);
+            Assert.assertEquals(result.length, ww.length());
+        }
+
+    }
+
+    /**
+     * There are only a limited number of possibilities.
+     * Thus wishedWordsThatMakeSense has to be adapted.
+     */
+    @Test
+    public void testScrabble_StartForWishedWordsThatMakeSense() {
+
+        wishedWordsThatMakeSense = new String[] {"success", "run", "cat"};
+
+        String[] result;
+
+        for (String ww: wishedWordsThatMakeSense) {
+
+            result = dc.scrabble_start(ww, -1);
+            Assert.assertNull(result);
+
+            result = dc.scrabble_start(ww, 0);
+            Assert.assertNull(result);
+
+            result = dc.scrabble_start(ww, 1);
+            Assert.assertTrue(result[0].contains(ww));
+
+            result = dc.scrabble_start(ww, 100);
+            Assert.assertTrue(result[0].contains(ww));
+
+        }
+
+    }
+
+    @Test
+    public void testScrabble_StartForWishedWordsThatDoNotMakeSense() {
+
+        wishedWordsThatMakeNOSense = new String[] {"apple juice please", "thisWordDoesNotExist", "!?", "-.", "420", " ", "" };
+
+        String[] result;
+
+        for (String ww: wishedWordsThatMakeNOSense) {
+
+            result = dc.scrabble_start(ww, -1);
+            Assert.assertNull(result);
+
+            result = dc.scrabble_start(ww, 0);
+            Assert.assertNull(result);
+
+            result = dc.scrabble_start(ww, 1);
+            Assert.assertNull(result);
+
+            result = dc.scrabble_start(ww, 100);
+            Assert.assertNull(result);
+        }
+
+    }
+
+    /**
+     * There are only a limited number of possibilities.
+     * Thus wishedWordsThatMakeSense has to be adapted.
+     */
+    @Test
+    public void testScrabble_EndForWishedWordsThatMakeSense() {
+
+        wishedWordsThatMakeSense = new String[] {"ic", "sea", "al"};
+
+        String[] result;
+
+        for (String ww: wishedWordsThatMakeSense) {
+
+            result = dc.scrabble_end(ww, -1);
+            Assert.assertNull(result);
+
+            result = dc.scrabble_end(ww, 0);
+            Assert.assertNull(result);
+
+            result = dc.scrabble_end(ww, 1);
+            Assert.assertTrue(result[0].contains(ww));
+
+            result = dc.scrabble_end(ww, 100);
+            Assert.assertTrue(result[0].contains(ww));
+
+        }
+
+    }
+
+    @Test
+    public void testScrabble_EndForWishedWordsThatDoNotMakeSense() {
+
+        wishedWordsThatMakeNOSense = new String[]{"apple juice please", "thisWordDoesNotExist", "!?", "-.", "420", " ", ""};
+
+        String[] result;
+
+        for (String ww : wishedWordsThatMakeNOSense) {
+
+            result = dc.scrabble_end(ww, -1);
+            Assert.assertNull(result);
+
+            result = dc.scrabble_end(ww, 0);
+            Assert.assertNull(result);
+
+            result = dc.scrabble_end(ww, 1);
+            Assert.assertNull(result);
+
+            result = dc.scrabble_end(ww, 100);
+            Assert.assertNull(result);
+        }
+
+    }
+
+    /**
+     * There are only a limited number of possibilities.
+     * Thus wishedWordsThatMakeSense has to be adapted.
+     */
+    @Test
+    public void testScrabble_ContainForWishedWordsThatMakeSense() {
+
+        wishedWordsThatMakeSense = new String[] {"ic", "sea", "al"};
+
+        String[] result;
+
+        for (String ww: wishedWordsThatMakeSense) {
+
+            result = dc.scrabble_contain(ww, -1);
+            Assert.assertNull(result);
+
+            result = dc.scrabble_contain(ww, 0);
+            Assert.assertNull(result);
+
+            result = dc.scrabble_contain(ww, 1);
+            Assert.assertTrue(result[0].contains(ww));
+
+            result = dc.scrabble_contain(ww, 100);
+            Assert.assertTrue(result[0].contains(ww));
+
+        }
+
+    }
+
+    @Test
+    public void testScrabble_ContainForWishedWordsThatDoNotMakeSense() {
+
+        wishedWordsThatMakeNOSense = new String[]{"apple juice please", "thisWordDoesNotExist", "!?", "-.", "420", " ", ""};
+
+        String[] result;
+
+        for (String ww : wishedWordsThatMakeNOSense) {
+
+            result = dc.scrabble_contain(ww, -1);
+            Assert.assertNull(result);
+
+            result = dc.scrabble_contain(ww, 0);
+            Assert.assertNull(result);
+
+            result = dc.scrabble_contain(ww, 1);
+            Assert.assertNull(result);
+
+            result = dc.scrabble_contain(ww, 100);
+            Assert.assertNull(result);
+        }
+
     }
 }

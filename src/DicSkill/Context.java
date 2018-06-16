@@ -21,7 +21,7 @@ import java.util.ArrayList;
 /**
  * 27.05.2018
  * NEW:
- * - 	preferresCategories is now of type ArrayList<String>
+ * - 	preferredCategories is now of type ArrayList<String>
  * -	added functions: addPrefCat, removePrefCat, deleteAllPrefCat, changePrefCat
  * TO DO:
  * -	make context saveable
@@ -45,7 +45,7 @@ import java.util.ArrayList;
  */
 public class Context implements Serializable {
 
-	/** VARIABlES **/
+	/** VARIABLES **/
 	private static final long serialVersionUID = 4L;
 	
 	private Function lastFunctionUsed;
@@ -93,7 +93,7 @@ public class Context implements Serializable {
 		else {
 			System.out.println("Sorry, I could not understand which changes you want to "
 					+ "make to your preferred categories. You may add a category, remove a "
-					+ "category or delete all preferres categories.");
+					+ "category or delete all preferred categories.");
 		}
 		
 	}

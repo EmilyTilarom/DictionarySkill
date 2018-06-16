@@ -3,6 +3,15 @@ package DicSkill;
 import java.io.Serializable;
 
 /**
+ * 15.06.2018
+ * NEW:
+ * -	Function Example added
+ * -	Bug fixes
+ * @author Walter
+ *
+ */
+
+/**
  * 03.06.2018
  * NEW:
  * -	Settings is now savable
@@ -30,26 +39,28 @@ import java.io.Serializable;
  */
 
 /**
- * This class enabled the user to modify the ouput. He can change the NOW (Number of words)
+ * This class enabled the user to modify the answers. He can change the NOW (Number of words)
  * to get a specific number of results for each function. 
  */
 public class Settings implements Serializable  
 {
-	/** VARIABlES **/
+	/** VARIABLES **/
 	private static final long serialVersionUID = 5L;
 
 	// NOW = Number Of Words
 	private int NOW_translation;
 	private int NOW_definition;
 	private int NOW_synonyms;
+	private int NOW_examples;
 	private int NOW_scrabble;
 	
 	/** Constructor **/
-	public Settings()
-	{
+	public Settings()  {
+
 		this.NOW_translation = 1;
 		this.NOW_definition = 1;
 		this.NOW_synonyms = 3;
+		this.NOW_examples = 3;
 		this.NOW_scrabble = 3;
 	}
 	
@@ -61,9 +72,11 @@ public class Settings implements Serializable
 	 * @param newNOW
 	 */
 	private void setAll(int newNOW) {
+
 		this.NOW_translation = newNOW;
 		this.NOW_definition = newNOW;
 		this.NOW_synonyms = newNOW;
+		this.NOW_examples = newNOW;
 		this.NOW_scrabble = newNOW;
 	}
 
@@ -80,20 +93,25 @@ public class Settings implements Serializable
 		try {
 			newNOW = Integer.parseInt( msg.substring(msg.lastIndexOf("to")+3) );
 			
-			if(msg.contains("translations")) {
+			if(msg.contains("translations") || msg.contains("translation") ) {
 				NOW_translation = newNOW;
 				functionFound = true;
 				System.out.println("Number of words for translations have been set to "+newNOW);
 			}
-			if(msg.contains("definitions")) {
+			if(msg.contains("definitions") || msg.contains("definition")) {
 				NOW_definition = newNOW;
 				functionFound = true;
 				System.out.println("Number of words for definitions have been set to "+newNOW);
 			}
-			if(msg.contains("synonyms")) {
+			if(msg.contains("synonyms") || msg.contains("synonym")) {
 				NOW_synonyms = newNOW;
 				functionFound = true;
 				System.out.println("Number of words for synonyms have been set to "+newNOW);
+			}
+			if(msg.contains("examples") || msg.contains("example")) {
+				NOW_examples = newNOW;
+				functionFound = true;
+				System.out.println("Number of words for examples have been set to "+newNOW);
 			}
 			if(msg.contains("scrabble")) {
 				NOW_definition = newNOW;
@@ -110,9 +128,9 @@ public class Settings implements Serializable
 			System.out.print("Sorry, you must set the number of words to a certain number.");
 		}		
 		
-		if(functionFound == false) {
+		if(!functionFound) {
 			System.out.print("Sorry, you must indicate which function you want to change the "
-					+ "number of words for. You may choose: definitons, translations, synonyms, scrabble or all.");
+					+ "number of words for. You may choose: definitions, translations, synonyms, example, scrabble or all.");
 		}
 	}
 	
@@ -132,5 +150,9 @@ public class Settings implements Serializable
 	public int getNOW_scrabble() {
 		return NOW_scrabble;
 	}
-	
+
+	public int getNOW_examples() {
+		return NOW_examples;
+	}
+
 }
