@@ -133,10 +133,12 @@ public class Lucene {
             //System.out.println("getperf for "+results.get(i));
             if(results.get(i).startsWith(" "+ww+";") || results.get(i).startsWith(" "+ww+" |")){
                 if(i != 0 && i%2 == 1){
+                    System.out.println("i!=0"+results.get(i-1));
                     perfect.add(results.get(i-1)); //works as long as first german word is different to english word
                     stelle++;
                 }
                 else if(i==0){
+                    System.out.println("i==0"+results.get(i));
                     perfect.add(results.get(i)); //works as long as first german word is different to english word
                     stelle+=2;
                 }
@@ -185,17 +187,33 @@ public class Lucene {
     {
         String[] endArray= new String[numberOfWishedResults];
         if(results.size()>0){
-            for(int i = 0; i<numberOfWishedResults; i++){
-                if(results.get(i).contains("{")){
-                    endArray[i] = results.get(i).substring(0, results.get(i).indexOf("{"));
-                }
-                else if(results.get(i).contains("|")){
-                    endArray[i] = results.get(i).substring(0, results.get(i).indexOf("|"));
-                }
-                else{
-                    endArray[i] = results.get(i);
+            if(results.size()>=numberOfWishedResults){
+                for(int i = 0; i<numberOfWishedResults; i++){
+                    if(results.get(i).contains("{")){
+                        endArray[i] = results.get(i).substring(0, results.get(i).indexOf("{"));
+                    }
+                    else if(results.get(i).contains("|")){
+                        endArray[i] = results.get(i).substring(0, results.get(i).indexOf("|"));
+                    }
+                    else{
+                        endArray[i] = results.get(i);
+                    }
                 }
             }
+            else{
+                for(int i = 0; i<results.size(); i++){
+                    if(results.get(i).contains("{")){
+                        endArray[i] = results.get(i).substring(0, results.get(i).indexOf("{"));
+                    }
+                    else if(results.get(i).contains("|")){
+                        endArray[i] = results.get(i).substring(0, results.get(i).indexOf("|"));
+                    }
+                    else{
+                        endArray[i] = results.get(i);
+                    }
+                }
+            }
+
         }
         else
             return null;
