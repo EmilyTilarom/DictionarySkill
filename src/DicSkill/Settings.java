@@ -47,8 +47,8 @@ public class Settings implements Serializable
 	/** Constructor **/
 	public Settings()
 	{
-		this.NOW_translation = 1;
-		this.NOW_definition = 1;
+		this.NOW_translation = 3;
+		this.NOW_definition = 3;
 		this.NOW_synonyms = 3;
 		this.NOW_scrabble = 3;
 	}

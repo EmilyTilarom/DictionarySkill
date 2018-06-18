@@ -73,22 +73,25 @@ public class DatabaseCommunicator {
 	 **/
 
 	/**
-	 * Shortens the Array to fit the NOW. If the output size is smaller,
-	 * the NOW will be ignored.
+	 * Shortens the Array to fit the nOW. If the output size is smaller,
+	 * the nOW will be ignored.
 	 *
 	 * @param dbOutput
 	 * @return String[] shortened Array
 	 */
-	private String[] extractArray(String dbOutput[], int NOW) {
+	private String[] extractArray(String dbOutput[], int nOW) {
 
 		String[] returnArray;
 
-		if(NOW < 0) {
+		if(nOW <= 0) {
 			return null;
 		}
 
-		if(NOW < dbOutput.length) {
-			returnArray = new String[NOW];
+		if(dbOutput == null)
+		    return null;
+
+		if(nOW < dbOutput.length) {
+			returnArray = new String[nOW];
 		}
 		else {
 			returnArray = new String[dbOutput.length];
