@@ -162,9 +162,8 @@ public class MessageManager {
      */
 	public String decodeMsg(String msg, Settings settings, DatabaseCommunicator dbC, Context context) {
 
-		if(msg == null) {
+		if(msg == null)
 			return "Sorry, I did not understand you.";
-		}
 
 		String wishedWord;
 		Function function;
@@ -175,10 +174,6 @@ public class MessageManager {
 
 		if(function == null)
 			return "Sorry, I don't know which function you are asking for.";
-
-		if(wishedWord == null) {
-			return "Sorry, I did not understand you.";
-		}
 
 		do {
 			switch(function) {
@@ -229,7 +224,7 @@ public class MessageManager {
 			
 			if(result == null)
 				wishedWord = shortenWishedWord(wishedWord); // removes the last word from the wished word
-		
+
 		}while(result == null && wishedWord != null);
 		
 		// Updates the context
@@ -346,7 +341,10 @@ public class MessageManager {
 
 	/**
 	 * Finds and returns the wished word in the message. Everything after the function keyword will be the wished word
-     * until further change in shortenWishedWord(). Example output: (define) "apple juice please"
+     * until further change in shortenWishedWord(). Example output: (define) "apple juice please".
+	 *
+	 * If the msg contains such a word, a substring will be created which starts at the
+	 * msg.lastIndexOf the found word + the length of the word + 1
 	 *
 	 * If there is no (new) wished word the last used wished word will be used.
 	 * In this case Context will be called.
@@ -359,48 +357,62 @@ public class MessageManager {
 		
 		String wishedWord;
 
-		/*
-		 * All different words which indicate the position of the wishedWord will be tested here.
-		 * If the msg contains such a word, a substring will be created which starts at the
-		 * msg.lastIndexOf the found word + the length of the word + 1
-		 * When the ww ends will still have to be taken in account later on
-		 */
+		try {
+			// *of* ; e.g. meaning/translation/spelling of
+			if (msg.contains("of")) {
+				wishedWord = msg.substring(msg.lastIndexOf("of") + 3);
+				context.setLastWishedWord(wishedWord);
+				return wishedWord;
+			}
+		}
+		catch(Exception e) {}
 
-		// *of* ; e.g. meaning/translation/spelling of
-		if(msg.contains("of")) {
-			wishedWord = msg.substring(msg.lastIndexOf("of")+3);
-			context.setLastWishedWord(wishedWord);
-			return wishedWord;
+		try {
+			// *with*
+			if(msg.contains("with")) {
+				wishedWord = msg.substring(msg.lastIndexOf("with")+5);
+				context.setLastWishedWord(wishedWord);
+				return wishedWord;
+			}
 		}
-		
-		// *with*
-		if(msg.contains("with")) {
-			wishedWord = msg.substring(msg.lastIndexOf("with")+5);
-			context.setLastWishedWord(wishedWord);
-			return wishedWord;
+		catch(Exception e) {}
+
+		try {
+			// ** keywords after which is directly followed by the ww (translate, define, spell, contain)
+			if(msg.contains("translate")) {
+				wishedWord = msg.substring(msg.lastIndexOf("translate")+10);
+				context.setLastWishedWord(wishedWord);
+				return wishedWord;
+			}
 		}
-		
-		// ** keywords after which is directly followed by the ww (translate, define, spell, contain)
-		if(msg.contains("translate")) {
-			wishedWord = msg.substring(msg.lastIndexOf("translate")+10);
-			context.setLastWishedWord(wishedWord);
-			return wishedWord;
+		catch(Exception e) {}
+
+		try {
+			if(msg.contains("define")) {
+				wishedWord = msg.substring(msg.lastIndexOf("define")+7);
+				context.setLastWishedWord(wishedWord);
+				return wishedWord;
+			}
 		}
-		if(msg.contains("define")) {
-			wishedWord = msg.substring(msg.lastIndexOf("define")+7);
-			context.setLastWishedWord(wishedWord);
-			return wishedWord;
+		catch(Exception e) {}
+
+		try {
+			if(msg.contains("spell")) {
+				wishedWord = msg.substring(msg.lastIndexOf("spell")+6);
+				context.setLastWishedWord(wishedWord);
+				return wishedWord;
+			}
 		}
-		if(msg.contains("spell")) {
-			wishedWord = msg.substring(msg.lastIndexOf("spell")+6);
-			context.setLastWishedWord(wishedWord);
-			return wishedWord;
+		catch(Exception e) {}
+
+		try {
+			if(msg.contains("contain")) {
+				wishedWord = msg.substring(msg.lastIndexOf("contain")+8);
+				context.setLastWishedWord(wishedWord);
+				return wishedWord;
+			}
 		}
-		if(msg.contains("contain")) {
-			wishedWord = msg.substring(msg.lastIndexOf("contain")+8);
-			context.setLastWishedWord(wishedWord);
-			return wishedWord;
-		}
+		catch(Exception e) {}
 
 		return context.getLastWishedWord();
 	}
