@@ -65,16 +65,12 @@ import rita.RiWordNet;
  */
 public class DatabaseCommunicator {
 
-	/**
-	 * VARIABLES
-	 **/
+	/** VARIABLES **/
 	private final RiWordNet ritaDB;
 	private final Lucene lucene;
 	private String pos;                // Rita specific: PartsOfSpeech. e.g.: noun, adjective, verb ...
 
-	/**
-	 * Constructor
-	 **/
+	/** Constructor **/
 	public DatabaseCommunicator() {
 
 		ritaDB = new RiWordNet("./dict/English/");
@@ -82,9 +78,7 @@ public class DatabaseCommunicator {
 		pos = null;
 	}
 
-	/**
-	 * Methods
-	 **/
+	/** Methods **/
 
 	/**
 	 * Shortens the Array to fit the NOW. If the output size is smaller,
@@ -96,20 +90,11 @@ public class DatabaseCommunicator {
 	 */
 	private String[] extractArray(String dbOutput[], int NOW) {
 
-		if(dbOutput == null) {
+		if(isQueryBad(dbOutput, NOW)) {
 			return null;
-		}
-		else {
-			if(dbOutput.length == 0) {
-				return null;
-			}
 		}
 
 		String[] returnArray;
-
-		if(NOW <= 0) {
-			return null;
-		}
 
 		if(NOW < dbOutput.length) {
 			returnArray = new String[NOW];
@@ -121,6 +106,32 @@ public class DatabaseCommunicator {
 		System.arraycopy(dbOutput, 0, returnArray, 0, returnArray.length);
 
 		return returnArray;
+	}
+
+	/**
+	 * In one of the following cases the array is useless and mus return null.
+	 * If there is no output, the output is empty or the numberOfWords is equal to or smaller than 0;
+	 *
+	 * @param dbOutput query result from the database
+	 * @param NOW numberOfWords for the ouput
+	 * @return boolean true if query result is bad
+	 */
+	private boolean isQueryBad(String dbOutput[], int NOW) {
+
+		if(dbOutput == null) {
+			return true;
+		}
+		else {
+			if(dbOutput.length == 0) {
+				return true;
+			}
+		}
+
+		if(NOW <= 0) {
+			return true;
+		}
+
+		return false;
 	}
 
 	/**
@@ -154,10 +165,13 @@ public class DatabaseCommunicator {
 			return null;
 		}
 
-		String result[];
+		String result[] = null;
 
-		pos = ritaDB.getBestPos(ww);
-		result = ritaDB.getAllGlosses(ww, pos);
+		try {
+			pos = ritaDB.getBestPos(ww);
+			result = ritaDB.getAllGlosses(ww, pos);
+		}
+		catch(Exception e) {}
 
 		result = extractArray(result, NOW);
 

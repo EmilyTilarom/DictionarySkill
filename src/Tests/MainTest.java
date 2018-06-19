@@ -42,6 +42,10 @@ public class MainTest {
             System.out.println("    -> Failure: " + failure.toString());
         }
 
+        if(result.getFailureCount() == 0) {
+            System.out.println("    -> Everything works as expected :)");
+        }
+
         System.out.println("--- Finished testing DatabaseCommunicator ---\n");
 
         return result;

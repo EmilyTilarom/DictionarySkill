@@ -52,7 +52,6 @@ public class Lucene {
 
 				if (directory.list().length != 11) {//11 files are created and used for indexing
 					//start indexing
-					System.out.println("Start indexing");
 
 					//delete all files in folder to avoid corrupt/outdated files
 					File[] files = directory.listFiles(); // get all files in directory
@@ -68,10 +67,6 @@ public class Lucene {
 					}
 
 					createIndex();
-					System.out.println("Indexing done");
-				}
-				else{
-					System.out.println("Already indexed");
 				}
 			}
 		}
