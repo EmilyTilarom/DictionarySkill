@@ -25,6 +25,25 @@ import org.apache.lucene.store.Directory;
 import org.apache.lucene.store.FSDirectory;
 
 /**
+ * 19.06.2018
+ * NEW:
+ * -	New system to filter results and get the best matches
+ * -	removal of unwanted/invalid characters is in a separate function now
+ * @author Lia (& Adrian assisted on some parts)
+ */
+
+/**
+ * 18.06.2018
+ * NEW:
+ * -	Indexing has been improved, so it wont do it every time
+ * -	unwanted/invalid characters removed
+ * -	attempts to filter results has been made
+ * TO DO:
+ * -	improve filtering of results
+ * @author Adrian
+ */
+
+/**
  * 09.06.2018
  * NEW:
  * -	set up class and most of the code
@@ -42,10 +61,12 @@ public class Lucene {
 	Directory directory;
 	Analyzer analyzer;
 	
-	String[] lastResults;
+	ArrayList<String> leftoverResults = new ArrayList<String>();
 	
 	/** CONSTRUCTOR **/
 	public Lucene() {
+		
+		// Creates index in specifies directory
 		try {
 			File directory = new File("./dict/German/indexDirectory");
 
@@ -91,10 +112,8 @@ public class Lucene {
 		try {
 			ArrayList<String> results = searchIndex(ww);
 
-
-			
-			//returns the best results
-			return getBestResults(results, nOW, ww);
+			// returns result without additional characters and sorted
+			return getResults(results, nOW, ww);
 			
 		} catch (IOException e) {
 			e.printStackTrace();
@@ -105,227 +124,127 @@ public class Lucene {
 		return null;
 	}
 
-    /**
-     * returns the number of perfect entries in the database
-     * @param results ArrayList<String> list of all matched entries
-     * @param ww wished word
-     * @return
-     */
 
     /**
      * returns perfect matches word by word in Array, returns null if no perfect is found
+     * adds not perfect but fittin results to leftover results
      * @param results ArrayList of fount entries containing the ww
      * @param ww WishedWord
      * @param numberOfWishedResults number of wished results
      * @return returns array of results or null if no perfect match was found
      */
-    private String[] getPerfectMatches(ArrayList<String> results, String ww, int numberOfWishedResults)
+    private ArrayList<String> getMatches(ArrayList<String> results, String ww, int numberOfWishedResults)
     {
-        //int existingPerfect = countPerfect(results, ww);
-        ArrayList<String> resultArrayList = new ArrayList<String>();
-        ArrayList<String> perfect = new ArrayList<String>();
-        String[] endArray = new String[numberOfWishedResults];
-
-        //returns line with perfect result
-        int stelle = 0;
-        for(int i=0; i<results.size(); i++)
+    	leftoverResults.clear(); // needs to be cleared before any new results are gathered
+    	
+    	/*	to get a matching result, each result needs to be divided at the | character. The position of the match
+         *  will have the same position in the english version and everything else can therefore be removed.
+         *  Afterwards there will be a matching result, which may contain synonyms divided by the ; character
+         */
+    	
+    	ArrayList<String> resultArrayList = new ArrayList<String>();
+    	int j = 1; // just a counter for the loop, starting at the first english content
+    	while(j<results.size()) // only every 2nd, so it only checks english results
         {
-            //System.out.println("getperf for "+results.get(i));
-            if(results.get(i).startsWith(" "+ww+";") || results.get(i).startsWith(" "+ww+" |")){
-                if(i != 0 && i%2 == 1){
-                    System.out.println("i!=0"+results.get(i-1));
-                    perfect.add(results.get(i-1)); //works as long as first german word is different to english word
-                    stelle++;
-                }
-                else if(i==0){
-                    System.out.println("i==0"+results.get(i));
-                    perfect.add(results.get(i)); //works as long as first german word is different to english word
-                    stelle+=2;
-                }
-                else{ //i!=0 && i%2==0
-                    System.out.println("ICH DARF NICHT, MAMA!");
-                }
-            }
+    		String[] englishLine = results.get(j).split(" \\|");
+    		String[] germanLine = results.get(j-1).split(" \\|");
+    		
+    		//for testing
+    		if(englishLine.length != germanLine.length) {
+    			System.out.println("oops, sth went wrong");
+    		}
+    		
+    		//adds the German equivalent for the found String to matches
+    		for(int i=0; i < englishLine.length; i++) {
+    			
+    			if(englishLine[i].contains(" "+ww+";") || englishLine[i].contains(";"+ww+" ")) {
+	    			
+    				// results are split at ; as they divide synonyms
+	    			String[] translations = germanLine[i].split(";");
+	    			
+	    			// adds found translation depending on: contains phrase or starts with phrase
+	    			for(int x=0; x<translations.length; x++) {
+	    				
+	    				if(englishLine[i].startsWith(" "+ww+";")) { // adds perfect matches to resultArrayList
+	    					resultArrayList.add(translations[x]);
+	    				}
+	    				else {
+	    					leftoverResults.add(translations[x]); // adds leftover matches to leftoverResults
+	    				}
+	    			
+	    				//System.out.println(translations[x]); // prints added line (for testing)
+	    			}
+	    		}
+    		}
+    		j +=2;
         }
-
-        //System.out.println("HIII"+perfect.get(0));
-        if(perfect.size()>0){
-            for(String perfect1 : perfect) {
-                String[] arr = perfect1.split(";");
-                for (String str : arr) {
-                    resultArrayList.add(str);
-                }
-            }
-            //resultArrayList.remove(resultArrayList.size()-1);
-        }
-        else
-            return null;
-
-        for(int i=0; i<numberOfWishedResults; i++){
-            if(resultArrayList.get(i).contains("{")){
+    	
+    	return resultArrayList;
+    	
+    	/*
+    	 // removes additional characters which do not belong in the result
+        String[] endArray = new String[resultArrayList.size()];
+        
+        for(int i=0; i<resultArrayList.size(); i++){
+            if(resultArrayList.get(i).contains("{")) { // removes everything after { character
                 endArray[i] = resultArrayList.get(i).substring(0, resultArrayList.get(i).indexOf("{"));
             }
-            else if(resultArrayList.get(i).contains("|")){
-                endArray[i] = resultArrayList.get(i).substring(0, resultArrayList.get(i).indexOf("|"));
+            else if(resultArrayList.get(i).contains("(")){
+                endArray[i] = resultArrayList.get(i).substring(0, resultArrayList.get(i).indexOf("("));
             }
             else{
                 endArray[i] = resultArrayList.get(i);
             }
         }
 
-        return  endArray;
+        return  endArray;*/
     }
 
-    /**
-     * returns not perfect matches
-     * @param results ArrayList of fount entries containing the ww
-     * @param ww WishedWord
-     * @param numberOfWishedResults number of wished results
-     * @return returns array of results or null if no perfect match was found
-     */
-    private String[] getNotPerfMatches(ArrayList<String> results, String ww, int numberOfWishedResults)
-    {
-        String[] endArray= new String[numberOfWishedResults];
-        if(results.size()>0){
-            if(results.size()>=numberOfWishedResults){
-                for(int i = 0; i<numberOfWishedResults; i++){
-                    if(results.get(i).contains("{")){
-                        endArray[i] = results.get(i).substring(0, results.get(i).indexOf("{"));
-                    }
-                    else if(results.get(i).contains("|")){
-                        endArray[i] = results.get(i).substring(0, results.get(i).indexOf("|"));
-                    }
-                    else{
-                        endArray[i] = results.get(i);
-                    }
-                }
-            }
-            else{
-                for(int i = 0; i<results.size(); i++){
-                    if(results.get(i).contains("{")){
-                        endArray[i] = results.get(i).substring(0, results.get(i).indexOf("{"));
-                    }
-                    else if(results.get(i).contains("|")){
-                        endArray[i] = results.get(i).substring(0, results.get(i).indexOf("|"));
-                    }
-                    else{
-                        endArray[i] = results.get(i);
-                    }
-                }
-            }
-
-        }
-        else
-            return null;
-
-        return endArray;
-    }
+    
 
     /**
-     * sorts the results to display the best results. best results are which match ww 100%, after that combinations of ww with other words
+     * sorts the results to display the perfect results (first). perfect results are which match ww 100%, 
+     * after that combinations of ww with other words from leftover results
      * @param results ArrayList of all entries found in the dictionary containing the ww
      * @param nOW number of words, tells the functions how many words are wished
      * @param ww wished word we are looking for in the data base
      * @return returns Array of results or null if word was not found
      */
-	private String[] getBestResults(ArrayList<String> results, int nOW, String ww) {
+	private String[] getResults(ArrayList<String> results, int nOW, String ww) {
 
 
-		String[] perfectResults;
-		String[] notPerfectResults;
-        String[] bestResults = new String[nOW];
-        int startForNonPerfectTranslations = 0;
+		ArrayList<String> perfectResults;
+		ArrayList<String> endResult = new ArrayList<String>();
 
-        perfectResults = getPerfectMatches(results, ww, nOW);
-
-
-        //check if onlyPerf is enough or if we need non-perfect translations
-        if(perfectResults != null && perfectResults.length == nOW) {
-            System.out.println("enough perfect");
-            return perfectResults;
-        }
-        else if(perfectResults == null || perfectResults.length < nOW){
-            System.out.println("not enough perfect");
-            if(perfectResults != null) {
-                int counter = 0;
-                for (String a : perfectResults) {
-                    bestResults[counter] = a;
-                    counter++;
-                }
-                startForNonPerfectTranslations = perfectResults.length;
-
-                //fill with bs translations
-                notPerfectResults = getNotPerfMatches(results, ww, nOW-perfectResults.length);
+        perfectResults = getMatches(results, ww, nOW);
+   
+        if(perfectResults.size() < nOW) { // adds leftover results in case not enough matches were found.
+            
+        	int i = 0; //counter for NOW
+        	
+        	// add perfect Results
+        	while(i<nOW && i<perfectResults.size()) {
+        		endResult.add( perfectResults.get(i) );
+        		i++;
+        	}
+        	
+        	// add leftover Results and removes them from ArrayList<String> leftoverResults
+        	while(i<nOW && !leftoverResults.isEmpty()) {
+        		endResult.add( leftoverResults.get( 0 ) );
+        		leftoverResults.remove( 0 );
+        		i++;
+        	}
+        	
+        	//returns null if no matches were found
+            if(endResult.size() == 0 || endResult == null) {
+            	return null;
             }
-            else{//if perfectResults == null
-                startForNonPerfectTranslations = 0;
-                //fill with bs translations
-                notPerfectResults = getNotPerfMatches(results, ww, nOW-0);
-            }
-
-            if(notPerfectResults != null){
-                for(String a : notPerfectResults){
-                    bestResults[startForNonPerfectTranslations] = a;
-                    startForNonPerfectTranslations++;
-                }
-            }
-            else return null;
-        }
-        else{
-            //Should never happen
-            System.out.println("HELLO SOMETING WRONG WITH perfectResults");
-            for(int i=0; i<nOW; i++){
-                bestResults[i] = perfectResults[i];
-            }
+        	
+        	return removeInvalidChars(endResult);
         }
 
-        /*
-        int counter = 0;
-        while(counter < nOW && counter < perfectResults.length){
-            bestResults[counter] = perfectResults[counter];
-            counter++;
-        }*/
-
-        /*
-        if(existingPerfect < nOW) { //if less perfect translations than wished trans exist, we need "non-perfect" translations, AFTER the perfect translations
-            perfect = new String[existingPerfect]; //create Array for perfect translations
-            startForNonPerfectTranslations = existingPerfect-1;//starting point for non perfect translations
-        }
-        */
-
-		// searches for exact match and sets it as first result upon finding it
-		/*
-		int i=1;
-
-		Iterator<String> resultIterator1 = results.iterator();
-		while(resultIterator1.hasNext() && i<nOW) {
-			String result = resultIterator1.next();
-
-			if(result.equals(ww)) {
-				//bestResults[0] = resultIterator1.next();
-			}
-			i++;
-		}
-		*/
-		//resets i depending on weather or not an exact match was found
-		/*if(bestResults[0].isEmpty()) {
-			i = 0;
-		}
-		else {
-			i = 1;
-		}
-		// fills up bestResults with other results
-		Iterator<String> resultIterator2 = results.iterator();
-		while(resultIterator2.hasNext() && i<nOW) {
-			String result = resultIterator2.next();
-			if(!result.equals(bestResults[0]))
-				bestResults[i++] = result;
-			i++;
-		}*/
-		
-		//lastResults = bestResults;
-		
-		return bestResults;
+        // returns perfect results if there are enough results
+        return removeInvalidChars(perfectResults);
 	}
 
     /**
@@ -408,7 +327,7 @@ public class Lucene {
 				IndexableField f = it.next();
 				String result = f.stringValue();
 				results.add( result );
-				System.out.println(f.name() + " " + i + " = " + result);
+				//System.out.println(f.name() + " " + i + " = " + result);
 			}
 		}
 		ireader.close();
@@ -423,5 +342,33 @@ public class Lucene {
 
 		return results;
 	}
+	
+
+	/**
+     * removes all characters after an invalid char such as { and converts from ArrayList to Array on the way
+     * @param phrases: Phrases in ArrayList<String> which may contain invalid chars
+     * @return phrases as Array, characters after an incalid character excluded
+     */
+	private String[] removeInvalidChars(ArrayList<String> phrases) {
+		
+		String[] invalidChars = {"{", "[", "(", "  "};
+		
+        String[] result = new String[phrases.size()];
+        
+        for(int i=0; i<phrases.size(); i++){
+            
+        	for(String invChar : invalidChars) {
+        		if(phrases.get(i).contains(invChar)) { 
+        			// removes everything after invalid character
+                	phrases.set(i, phrases.get(i).substring(0, phrases.get(i).indexOf(invChar)) ); 
+                }
+        	}
+            result[i] = phrases.get(i);
+            
+        }
+        
+        return result;
+	}
+
 	
 }
