@@ -92,9 +92,6 @@ public class Lucene {
 					createIndex();
 					System.out.println("Indexing done");
 				}
-				else{
-					System.out.println("Already indexed");
-				}
 			}
 		}
 		catch (IOException e) {
@@ -128,6 +125,7 @@ public class Lucene {
     /**
      * returns perfect matches word by word in Array, returns null if no perfect is found
      * adds not perfect but fittin results to leftover results
+	 *
      * @param results ArrayList of fount entries containing the ww
      * @param ww WishedWord
      * @param numberOfWishedResults number of wished results

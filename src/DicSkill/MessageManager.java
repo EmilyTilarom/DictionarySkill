@@ -127,6 +127,7 @@ public class MessageManager {
 		keywords_setting = new ArrayList<String>();
 		keywords_setting.add("change number of words");
 		keywords_setting.add("set number of words");
+		keywords_setting.add("set the number of words");
 		keywords_setting.add("change number of results");
 		keywords_setting.add("set number of results");
 		
@@ -445,7 +446,7 @@ public class MessageManager {
 				return "Synonyms for " + context.getLastWishedWord() + " are " + result;
 
 			case EXAMPLE:
-				return "Examples for " + context.getLastWishedWord() + " are " + result;
+				return "An Examples for " + context.getLastWishedWord() + " is " + result;
 			
 			case SCRABBLE_START:
 				return "Words which start with " + context.getLastWishedWord() + " are " + result;

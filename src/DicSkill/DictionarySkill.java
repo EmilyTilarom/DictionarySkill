@@ -23,7 +23,6 @@ import java.util.Scanner;
 
 public class DictionarySkill {
 
-	
 	public static void main(String[] args) {
 
 		State state = new State();
@@ -50,5 +49,4 @@ public class DictionarySkill {
 		
 		System.out.println("Goodbye");
 	}
-	
 }

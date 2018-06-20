@@ -89,7 +89,6 @@ public class State {
 			return new Context();
 		}
 		catch(IOException e) {
-			System.out.println("New context has been created.");
 			return new Context();
 		}
 
@@ -118,7 +117,6 @@ public class State {
 			return new Settings();
 		}
 		catch(IOException e) {
-			System.out.println("New settings have been created.");
 			return new Settings();
 		}
 		
