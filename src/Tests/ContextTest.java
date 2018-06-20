@@ -83,7 +83,7 @@ public class ContextTest {
         con.changePrefCat("would you be so kind to remove category " + message[1]);
 
         // Trail after
-        con.changePrefCat("remove category " + message[2] + "because i enjoy watching sports");
+        con.changePrefCat("remove category " + message[2] + "because i enjoy watching sports while drinking beer");
 
         Assert.assertFalse(con.getPreferredCategory().contains(message[0]));
         Assert.assertFalse(con.getPreferredCategory().contains(message[1]));
