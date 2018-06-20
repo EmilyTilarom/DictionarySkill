@@ -51,7 +51,11 @@ public class DictionarySkillImpl extends AMessageProcessor implements Skill {
 
 	private boolean isClosed = false;
 	
-	SkillRegex[] skillRegexes = new SkillRegex[] { new SkillRegex(this, "(translate|define|synonyms|translation)") };
+	SkillRegex[] skillRegexes = new SkillRegex[] { new SkillRegex(this, "(translate)|(define)|(synonyms)|(translation)") };
+	State state = new State();
+	Context context = state.loadContext(); // loads context. If no context is found, creates new one.
+	Settings settings = state.loadSettings(); // loads settings. If no settings is found, creates new one.
+	DatabaseCommunicator dbC = new DatabaseCommunicator();
     
 	ASkillExecutable dictionarySkillExecutable = null;
 
@@ -124,7 +128,7 @@ public class DictionarySkillImpl extends AMessageProcessor implements Skill {
 			}
 		}
 	}
-	
+	/*
 	public static void main(String[] args) {
 
 		State state = new State();
@@ -144,12 +148,12 @@ public class DictionarySkillImpl extends AMessageProcessor implements Skill {
 		{
 			System.out.println( tb.decodeMsg(msg, settings, dbC, context) );
 			msg = read.nextLine().toLowerCase();
-
 		}
 		
 		state.save(settings, context); // saves the updated context
 		
 		System.out.println("Goodbye");
 	}
+	*/
 	
 }

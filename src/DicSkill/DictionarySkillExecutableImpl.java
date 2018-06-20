@@ -17,20 +17,30 @@ public class DictionarySkillExecutableImpl extends ASkillExecutable implements S
 		this.speechOut = speechOut;
 	}
 	
-	State state = null;
-	Context context = state.loadContext(); // loads context. If no context is found, creates new one.
-	Settings settings = state.loadSettings(); // loads settings. If no settings is found, creates new one.
 	MessageManager tb = null;
-	DatabaseCommunicator dbC = new DatabaseCommunicator();
 	
 	//actual code to run when activated
 	public void doRun() {
-		state = new State();
 		tb = new MessageManager();
 		
-		String msg = "";
+		//text to be spoken
+		this.speechOut.setOutputText(this, tb.decodeMsg(speechOut.toString(), settings, dbC, context), false);
 		
-		tb.decodeMsg(msg, settings, dbC, context);
+		//play
+		this.speechOut.play(this);
+		
+		System.out.println("before wait");
+
+		synchronized (lockObject) {
+			try {
+				lockObject.wait();
+			} catch (InterruptedException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+		}
+
+		System.out.println("after wait");
 	}
 	
 	@Override
