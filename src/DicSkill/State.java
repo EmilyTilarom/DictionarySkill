@@ -37,7 +37,7 @@ public class State {
 	private File settings_file;
 
 	/** Constructor **/
-	State() {
+    public State() {
 		context_file = new File("/State", "context_file.ser");
 		settings_file = new File("/State", "settings_file.ser");
 	}

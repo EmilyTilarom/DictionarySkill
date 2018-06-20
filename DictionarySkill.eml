@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<component inherit-compiler-output="true" inheritJdk="true">
+	<output-test url="file://$MODULE_DIR$/out/test/DictionarySkill"/>
+	<exclude-output/>
+	<contentEntry url="file://$MODULE_DIR$"/>
+	<lib name="lucene-core-7.3.0.jar" scope="COMPILE">
+		<relative-module-cls project-related="jar://$PROJECT_DIR$/dict/lucene-7.3.0/core/lucene-core-7.3.0.jar!/"/>
+	</lib>
+	<lib name="lucene-queryparser-7.3.0.jar" scope="COMPILE">
+		<relative-module-cls project-related="jar://$PROJECT_DIR$/dict/lucene-7.3.0/queryparser/lucene-queryparser-7.3.0.jar!/"/>
+	</lib>
+	<lib name="lucene-queries-7.3.0.jar" scope="COMPILE">
+		<relative-module-cls project-related="jar://$PROJECT_DIR$/dict/lucene-7.3.0/queries/lucene-queries-7.3.0.jar!/"/>
+	</lib>
+	<lib name="lucene-expressions-7.3.0.jar" scope="COMPILE">
+		<relative-module-cls project-related="jar://$PROJECT_DIR$/dict/lucene-7.3.0/expressions/lucene-expressions-7.3.0.jar!/"/>
+	</lib>
+	<levels>
+		<level name="rita" value="project"/>
+	</levels>
+</component>
