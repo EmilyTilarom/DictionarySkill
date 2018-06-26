@@ -1,5 +1,16 @@
 package DicSkill;
 
+import java.util.ArrayList;
+
+/**
+ * 26.06.2018
+ * NEW:
+ * - 	Added function to get more results from last result and needed leftoverResults array for this
+ * -	function extractResult now also handles leftoverResults.
+ * -	giveSynonyms now also gets results from lucene
+ * @author Lia
+ */
+
 /**
  * 15.06.2018
  * TO DO:
@@ -69,6 +80,7 @@ public class DatabaseCommunicator {
 	private final RiWordNet ritaDB;
 	private final Lucene lucene;
 	private String pos;                // Rita specific: PartsOfSpeech. e.g.: noun, adjective, verb ...
+	private String[] leftoverResults;
 
 	/** Constructor **/
 	public DatabaseCommunicator() {
@@ -93,16 +105,20 @@ public class DatabaseCommunicator {
 		if(isQueryBad(dbOutput, NOW)) {
 			return null;
 		}
-
+		
 		String[] returnArray;
 
-		if(NOW < dbOutput.length) {
+		if(NOW <= dbOutput.length) {
 			returnArray = new String[NOW];
+			
+			// saves leftover Results in leftoverResults array
+			leftoverResults = new String[dbOutput.length-returnArray.length];
+			System.arraycopy(dbOutput, returnArray.length, leftoverResults, 0, dbOutput.length-returnArray.length);
 		}
 		else {
 			returnArray = new String[dbOutput.length];
+			leftoverResults = null;
 		}
-
 		System.arraycopy(dbOutput, 0, returnArray, 0, returnArray.length);
 
 		return returnArray;
@@ -121,10 +137,8 @@ public class DatabaseCommunicator {
 		if(dbOutput == null) {
 			return true;
 		}
-		else {
-			if(dbOutput.length == 0) {
-				return true;
-			}
+		else if(dbOutput.length == 0) {
+			return true;
 		}
 
 		if(NOW <= 0) {
@@ -147,6 +161,7 @@ public class DatabaseCommunicator {
 
 		result = lucene.translate(ww, NOW);
 		result = extractArray(result, NOW);
+		leftoverResults = lucene.getLeftoverResults();
 
 		return result;
 	}
@@ -172,13 +187,12 @@ public class DatabaseCommunicator {
 			result = ritaDB.getAllGlosses(ww, pos);
 		}
 		catch(Exception e) {}
-
+		
 		result = extractArray(result, NOW);
-
+		
 		return result;
 	}
 
-	// returns synonyms for the wished word
 
 	/**
 	 * GiveSynonyms provides a synonym of the wished word.
@@ -190,22 +204,42 @@ public class DatabaseCommunicator {
 	 */
 	public String[] giveSynonyms(String ww, int NOW) {
 
-		if (!ritaDB.exists(ww)) {
+		ArrayList<String> listResults = new ArrayList<String>();
+		
+		String luceneResult[] = lucene.getSynonyms(ww);
+		
+		if (!ritaDB.exists(ww) && luceneResult.length==0) {
 			return null;
 		}
+		else if (!ritaDB.exists(ww)) {
+			return luceneResult;
+		}
 
-		String result[];
-
+		String ritaResult[];
 		pos = ritaDB.getBestPos(ww);
-		result = ritaDB.getAllSimilar(ww, pos);
+		ritaResult = ritaDB.getAllSimilar(ww, pos);
 
+		// adds ritas and lucenes results to end result, while making sure there are no duplicates
+		String result[] = new String[ritaResult.length+luceneResult.length];
+		for(int i=0; i<ritaResult.length; i++) {
+			listResults.add(ritaResult[i]);
+			result[i] = ritaResult[i];
+		}
+		for(int i=0; i<luceneResult.length; i++) {
+			if(!listResults.contains(luceneResult[i])) {
+				listResults.add(luceneResult[i]);
+				result[i+ritaResult.length] = luceneResult[i];
+			}
+		}
+		
 		result = extractArray(result, NOW);
 
 		return result;
 	}
 
 	/**
-	 * GiveExamples provides an example to the wished word.
+	 * GiveExamples provides an example for the wished word. Our database does not provide many example sentences
+	 * and therefore, this may return null as a result a lot of the times.
 	 *
 	 * @param ww  wishedWord
 	 * @param NOW numberOfWords
@@ -229,7 +263,7 @@ public class DatabaseCommunicator {
 
 	/**
 	 * Spell provides the spelling of a word.
-	 * This function does not call a database.
+	 * This function does not need any database
 	 *
 	 * @param ww wishedWord
 	 * @return String[] databaseOutput[]
@@ -301,5 +335,31 @@ public class DatabaseCommunicator {
 		result = extractArray(result, NOW);
 
 		return result;
+	}
+
+	public String[] getMoreResults(int NOW) {
+		
+		if(leftoverResults == null) {
+			return null;
+		}
+		
+		String[] returnArray;
+
+		if(NOW < leftoverResults.length) {
+			returnArray = new String[NOW];
+			
+			// copies NOW results from leftoverResults to returnArray, then shortens leftoverResults
+			System.arraycopy(leftoverResults, 0, returnArray, 0, returnArray.length);
+			String[] tmpArray = new String[leftoverResults.length-NOW];
+			System.arraycopy(leftoverResults, returnArray.length-1, tmpArray, 0, tmpArray.length);
+			leftoverResults = tmpArray;
+		}
+		else {
+			// "copies" all results from leftoverResults to returnArray and then deletes content of leftoverResults
+			returnArray = leftoverResults;
+			leftoverResults = null;
+		}
+
+		return returnArray;
 	}
 }

@@ -1,6 +1,18 @@
 package DicSkill;
 
 import java.io.Serializable;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+
+/**
+ * 25.06.2018
+ * NEW:
+ * -	Settings now uses Regex instead of searching for keywords
+ * -	improved dialog; whole msg does not have to be repeated anymore
+ * -	new Function which returns NOW for function depending on function
+ * @author Lia
+ *
+ */
 
 /**
  * 15.06.2018
@@ -53,6 +65,8 @@ public class Settings implements Serializable
 	private int NOW_synonyms;
 	private int NOW_examples;
 	private int NOW_scrabble;
+	private int lastFailedNumberChange; // remembers the number after a failed change
+	private String lastFailedFunctionChange; // remembers the function after a failed change
 	
 	/** Constructor **/
 	public Settings()  {
@@ -62,6 +76,11 @@ public class Settings implements Serializable
 		this.NOW_synonyms = 3;
 		this.NOW_examples = 3;
 		this.NOW_scrabble = 3;
+		
+		lastFailedFunctionChange = null;
+		lastFailedNumberChange = -1;
+		String regexExpressionSettings = ".*\\b(set|change|put)\\b (the )?\\b(number|amount)\\b of \\b(words|results)\\b for "
+				+ "\\b(definition|translation|synonym|example|scrabble function)s?\\b to ([1-9])([0-9]*).*";
 	}
 	
 	/** Methods **/
@@ -86,51 +105,132 @@ public class Settings implements Serializable
 	 * @param msg message from the user
 	 */
 	public void setNOW(String msg) {
-
-		boolean functionFound = false;
-		int newNOW;
-
-		try {
-			newNOW = Integer.parseInt( msg.substring(msg.lastIndexOf("to")+3) );
-			
-			if(msg.contains("translations") || msg.contains("translation") ) {
-				NOW_translation = newNOW;
-				functionFound = true;
-				System.out.println("Number of words for translations have been set to "+newNOW);
-			}
-			if(msg.contains("definitions") || msg.contains("definition")) {
-				NOW_definition = newNOW;
-				functionFound = true;
-				System.out.println("Number of words for definitions have been set to "+newNOW);
-			}
-			if(msg.contains("synonyms") || msg.contains("synonym")) {
-				NOW_synonyms = newNOW;
-				functionFound = true;
-				System.out.println("Number of words for synonyms have been set to "+newNOW);
-			}
-			if(msg.contains("examples") || msg.contains("example")) {
-				NOW_examples = newNOW;
-				functionFound = true;
-				System.out.println("Number of words for examples have been set to "+newNOW);
-			}
-			if(msg.contains("scrabble")) {
-				NOW_definition = newNOW;
-				functionFound = true;
-				System.out.println("Number of words for scrabble have been set to "+newNOW);
-			}
-			if(msg.contains("all")) {
-				setAll(newNOW);
-				functionFound = true;
-				System.out.println("Number of words for all have been set to "+newNOW);
-			}
-		}
-		catch (NumberFormatException e) {
-			System.out.print("Sorry, you must set the number of words to a certain number.");
-		}		
 		
-		if(!functionFound) {
-			System.out.print("Sorry, you must indicate which function you want to change the "
-					+ "number of words for. You may choose: definitions, translations, synonyms, example, scrabble or all.");
+		String foundFunction = null;
+		int newNOW=-1;
+		Pattern pattern;
+		Matcher matcher;
+		
+		// all info was provided
+		pattern = Pattern.compile(".*\\b(set|change|put)\\b (the )?\\b(number|amount)\\b of \\b(words|results)\\b for "
+				+ "\\b(definition|translation|synonym|example|scrabble function|all|all functions)s?\\b to ([1-9])([0-9]*).*");
+		matcher = pattern.matcher(msg);
+		if (matcher.matches()) // checks if all info was provided
+		{
+			foundFunction = matcher.group(5); // gets function from msg
+			try {
+				newNOW = Integer.parseInt(matcher.group(6)); // gets number from msg
+			}
+			catch (NumberFormatException e) {
+				System.out.print("Sorry, you must set the number of words to a certain number.");
+			}
+			setForFunction(foundFunction, newNOW);
+			
+		}
+		
+
+		// if function was not named, but number was
+		pattern = Pattern.compile(".*\\b(set|change|put)\\b (the )?\\b(number|amount)\\b of \\b(words|results)\\b to ([1-9])([0-9]*).*");
+		matcher = pattern.matcher(msg);
+		if(matcher.matches()) {
+			String number = matcher.group().replaceAll("\\D*",""); // gets number from msg
+			lastFailedNumberChange = Integer.parseInt(number); //remember number
+			System.out.print("What function do you want to change the number of results for? You may choose: definitions, translations, synonyms, example, scrabble or all.");
+		}
+		// if number was not named, but function was
+		pattern = Pattern.compile(".*\\b(set|change|put)\\b (the )?\\b(number|amount)\\b of \\b(words|results)\\b for "
+				+ "\\b(definition|translation|synonym|example|scrabble function|all|all functions)s?\\b[set\\d]*");
+		matcher = pattern.matcher(msg);
+		if(matcher.matches()) {
+			lastFailedFunctionChange = matcher.group(5); //remember function
+			System.out.print("What number do you want to set it to?");
+		}
+		
+		
+		// Msg was unclear before and is being cleared up now
+		pattern = Pattern.compile(".*(?:to )?([1-9])([0-9]*).*"); //OPTION 1: number was missing
+		matcher = pattern.matcher(msg);
+		if (matcher.matches() && lastFailedFunctionChange != null)
+		{
+			String number = matcher.group().replaceAll("\\D*",""); // gets number from msg as string
+			foundFunction = lastFailedFunctionChange;
+			newNOW = Integer.parseInt(number);
+			setForFunction(foundFunction, newNOW);
+		}
+		pattern = Pattern.compile(".*\\b(definition|translation|synonym|example|scrabble function)s?\\b.*");
+		matcher = pattern.matcher(msg);
+		if (matcher.matches() && lastFailedNumberChange!=-1)//OPTION 2: function was missing
+		{
+			foundFunction = matcher.group(1); // gets function from msg
+			newNOW = lastFailedNumberChange;
+			setForFunction(foundFunction, lastFailedNumberChange);
+		}
+		
+		
+		if(newNOW==-1 && foundFunction==null) {
+			System.out.print("Sorry, you need to be more precise.");
+		}
+		
+	}
+	
+	
+	public void setForFunction(String function, int nOW) {
+		//changes settings depending on which function was found and prints msg.
+		if(function.contains("translation")) {
+			NOW_translation = nOW;
+			System.out.println("Number of words for translations have been set to "+nOW);
+		}
+		if(function.contains("definition")) {
+			NOW_definition = nOW;
+			System.out.println("Number of words for definitions have been set to "+nOW);
+		}
+		if(function.contains("synonym")) {
+			NOW_synonyms = nOW;
+			System.out.println("Number of words for synonyms have been set to "+nOW);
+		}
+		if(function.contains("example")) {
+			NOW_examples = nOW;
+			System.out.println("Number of words for examples have been set to "+nOW);
+		}
+		if(function.contains("scrabble")) {
+			NOW_definition = nOW;
+			System.out.println("Number of words for scrabble have been set to "+nOW);
+		}
+		if(function.contains("all")) {
+			setAll(nOW);
+			System.out.println("Number of words for all have been set to "+nOW);
+		}
+		
+		//Reset after succesful attempt
+		lastFailedNumberChange = -1; 
+		lastFailedFunctionChange = null;
+	}
+	
+	public int getNOW(Function f) {
+		
+		this.NOW_translation = 1;
+		this.NOW_definition = 1;
+		this.NOW_synonyms = 3;
+		this.NOW_examples = 3;
+		this.NOW_scrabble = 3;
+		switch(f) {
+			case TRANSLATION:
+				return getNOW_translation();
+			case DEFINITION:
+				return getNOW_definition();
+			case SYNONYMS:
+				return getNOW_synonyms();
+			case EXAMPLE:
+				return getNOW_examples();
+			case SCRABBLE_START:
+				return getNOW_scrabble();
+			case SCRABBLE_END:
+				return getNOW_scrabble();
+			case SCRABBLE_CONTAIN:
+				return getNOW_scrabble();
+			default:
+				System.out.println("You can't get more results for this function.");
+				return 0;
 		}
 	}
 	

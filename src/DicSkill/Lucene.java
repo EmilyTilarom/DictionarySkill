@@ -119,6 +119,9 @@ public class Lucene {
 		
 		try {
 			ArrayList<String> results = searchIndex(ww);
+			if(results == null) {
+				return null;
+			}
 
 			// returns result without additional characters and sorted
 			return getResults(results, nOW, ww);
@@ -196,12 +199,12 @@ public class Lucene {
 	    						|| englishLine[i].startsWith(ww+";")
 	    						|| englishLine[i].contains("; "+ww+";") ) { // adds perfect matches to resultArrayList
 	    					
-	    					System.out.println("perfect: "+englishLine[i] + " = "+ translations[x]);
+	    					//System.out.println("perfect: "+englishLine[i] + " = "+ translations[x]); // for testing
 	    					
 	    					resultArrayList.add(removeInvalidChars(translations[x]));
 	    				}
 	    				else { // imperfect matches
-	    					System.out.println("imperfect: "+englishLine[i] + " = "+ translations[x]);
+	    					// System.out.println("imperfect: "+englishLine[i] + " = "+ translations[x]);// for testing
 	    					if(leftoverResults.size() == 0) {
 	    						leftoverResults.add(". Other results you may like are "+ removeInvalidChars(translations[x]) );
 	    					}
@@ -398,6 +401,9 @@ public class Lucene {
 		directory = FSDirectory.open(Paths.get("./dict/German/indexDirectory"));
 		
 		String searchWord = ww;
+		if(ww == null) {
+			return null;
+		}
 		
 		// Search the index:
 		DirectoryReader ireader = DirectoryReader.open(directory);
@@ -435,7 +441,7 @@ public class Lucene {
      * @param nOW: number of words/results requested
      * @return returns array of results or null if no synonyms were
      */
-	public String[] getSynonyms(String ww, int nOW) {
+	public String[] getSynonyms(String ww) {
 		leftoverResults.clear(); // needs to be cleared before any new results are gathered
 		ArrayList<String> results = new ArrayList<String>();
 		try {
@@ -471,13 +477,7 @@ public class Lucene {
 		    			int x=0;
 		    			while(x<synonyms.length) {
 		    				if(!removeInvalidChars(synonyms[x]).equals(ww)) { // if found synonym isnt the same as ww
-		    					
-		    					if(x<nOW) { // adds to result if nOW results werent found yet
-		    						resultArrayList.add(synonyms[x]);
-		    					}
-		    					else { //adds to leftover results, if already nOW results were found
-		    						leftoverResults.add(synonyms[x]);
-		    					}	
+		    					resultArrayList.add(synonyms[x]);
 		    				}
 		    				x++;
 		    			}
@@ -503,5 +503,7 @@ public class Lucene {
 		
 	}
 
-	
+	public String[] getLeftoverResults() {
+		return removeInvalidChars(leftoverResults);
+	}
 }

@@ -2,11 +2,24 @@ package DicSkill;
 
 import java.util.ArrayList;
 import java.util.Iterator;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+
+/**
+ * 26.06.2018
+ * NEW:
+ * -	swapped keywords with regex 
+ * 		->	made changes to functions findFunction, findWishedWord as a result 
+ * -	added the option to ask for more results
+ * -	context and settings are now saved by this class
+ * -	improve createMsg depending on number of results
+ * TO DO:
+ * -	delete preferred categories or make regex expressions
+ * @author Lia
+ */
 
 /**
  * 15.06.2018
- * TO DO:
- * -	consider category in code? -> in DatabaseCommunicator?
  * NEW:
  * -	bug fixes
  * @author Walter, Adrian
@@ -14,8 +27,6 @@ import java.util.Iterator;
 
 /**
  * 10.06.2018
- * TO DO:
- * -	consider category in code? -> in DatabaseCommunicator?
  * NEW:
  * -	documentation improved
  * -	bug fixes
@@ -66,74 +77,38 @@ public class MessageManager {
 	
 	/** VARIABLES **/
     // Keywords define which function will be called.
-	private ArrayList<String> keywords_translation;
-	private ArrayList<String> keywords_definition;
-	private ArrayList<String> keywords_synonyms;
-	private ArrayList<String> keywords_scrabble_start;
-	private ArrayList<String> keywords_scrabble_end;
-	private ArrayList<String> keywords_scrabble_contain;
-	private ArrayList<String> keywords_spelling;
-	private ArrayList<String> keywords_example;
+	String regexExpression1; // define word
+	String regexExpression2; // definition of word
+	String regexExpression3; // how do you spell word?
+	String regexExpression4; // how do you say word in German?
+	String regexExpression5; // Whats a word?
+	String regexExpressionSettings; 
+	String regexExpressionHelper;
+	String regexExpressionMore;
 	
-	private ArrayList<String> keywords_setting;
+	//private ArrayList<String> keywords_setting;
 	private ArrayList<String> keywords_whatCanYouDo;
 	private ArrayList<String> keywords_changePrefCat;
 
 	/** Constructor **/
 	public MessageManager() {
 		
-		// All keywords are set here
 		
-		// TRANSLATION
-		keywords_translation = new ArrayList<String>();
-		keywords_translation.add("translate");
-		keywords_translation.add("translation");
-		keywords_translation.add("in German");
+		// expressions for one or multiple functions (translation, definition, spelling, scrabble, examples, synonyms)
+		regexExpression1 = ".*\\b(define|translate|spell|contain|start with|end with|contains|starts with|ends with)\\b .+"; // define word
+		regexExpression2 = ".*\\b(definition|spelling|translation|example( sentence)?|synonym)s?\\b \\b(of|for)\\b (.+)"; // definition of word
+		regexExpression3 = ".*what does (.+) mean.*"; // what does word mean?
+		regexExpression4 = "(.+) in german.*"; // how do you say word in German?
+		regexExpression5 = ".*what( is| are|'s) (a )?(.+)";
 		
-		// DEFINITION
-		keywords_definition = new ArrayList<String>();
-		keywords_definition.add("define");
-		keywords_definition.add("definition");
-		keywords_definition.add("meaning");
-		keywords_definition.add("mean");
+		// settings
+		regexExpressionSettings = ".*\\b(set|change|put)\\b (the )?\\b(number|amount)\\b of \\b(words|results)\\b.*"; // set numbr of words for definitions to 6
 		
-		// SYNONYMS
-		keywords_synonyms = new ArrayList<String>();
-		keywords_synonyms.add("synonym");
-		keywords_synonyms.add("synonyms");
+		// helper function
+		regexExpressionHelper = ".*what can you do.*";
 		
-		// SCRABBLE START WITH
-		keywords_scrabble_start = new ArrayList<String>();
-		keywords_scrabble_start.add("start");
-		
-		// SCRABBLE END WITH
-		keywords_scrabble_end = new ArrayList<String>();
-		keywords_scrabble_end.add("end");
-				
-		// SCRABBLE CONTAIN WITH
-		keywords_scrabble_contain = new ArrayList<String>();
-		keywords_scrabble_contain.add("contain");
-		
-		// SPELLING
-		keywords_spelling = new ArrayList<String>();
-		keywords_spelling.add("spell");
-		keywords_spelling.add("spelling");
-		
-		// EXAMPLE
-		keywords_example = new ArrayList<String>();
-		keywords_example.add("example"); 
-		
-		// SETTINGS
-		keywords_setting = new ArrayList<String>();
-		keywords_setting.add("change number of words");
-		keywords_setting.add("set number of words");
-		keywords_setting.add("set the number of words");
-		keywords_setting.add("change number of results");
-		keywords_setting.add("set number of results");
-		
-		// WHAT CAN YOU DO?
-		keywords_whatCanYouDo = new ArrayList<String>();
-		keywords_whatCanYouDo.add("what can you do");
+		// asking for more sesults
+		regexExpressionMore = ".*more.*";
 		
 		// CHANGE PREFERRED CATEGORIES
 		keywords_changePrefCat = new ArrayList<String>();
@@ -161,19 +136,20 @@ public class MessageManager {
      * @param context
      * @return answer for the user
      */
-	public String decodeMsg(String msg, Settings settings, DatabaseCommunicator dbC, Context context) {
+	public String decodeMsg(String msg, Settings settings, DatabaseCommunicator dbC, Context context, State state) {
 
 		if(msg == null)
-			return "Sorry, I did not understand you.";
+			return "Oops, your message did not arrive.";
 
 		String wishedWord;
 		Function function;
 		String[] result; 		// the result received from the DatabaseCommunicator
 
+		function = findFunction(msg, context);
 		wishedWord = findWishedWord(msg, context);
-		function = findFunction(msg);
+		wishedWord = checkWishedWord(wishedWord, context, function); // checks if "this, it, that" is probably to mean the last ww and changed it if so
 
-		if(function == null)
+		if(function == null) // if function wasnt found, try if last one could fit the input
 			return "Sorry, I don't know which function you are asking for.";
 
 		do {
@@ -184,6 +160,7 @@ public class MessageManager {
 					break;
 				case DEFINITION:
 					result = dbC.define(wishedWord, settings.getNOW_definition());
+					state.save(settings, context);
 					break;
 				case SPELLING:
 					result = dbC.spell(wishedWord);
@@ -207,6 +184,7 @@ public class MessageManager {
 					settings.setNOW(msg);
 					result = new String[1];
 					result[0] = "";
+					state.save(settings, context);
 					break;
 				case WHATCANYOUDO:
 					result = new String[1];
@@ -216,6 +194,10 @@ public class MessageManager {
 					context.changePrefCat(msg);
 					result = new String[1];
 					result[0] = "";
+					state.save(settings, context);
+					break;
+				case MORE:
+					result = dbC.getMoreResults(settings.getNOW(context.getLastFunctionUsed()));
 					break;
 				default:
 					result = new String[1];
@@ -224,7 +206,7 @@ public class MessageManager {
 				}
 			
 			if(result == null)
-				wishedWord = shortenWishedWord(wishedWord); // removes the last word from the wished word
+				wishedWord = shortenWishedWord(wishedWord, msg); // removes the last word from the wished word
 
 		}while(result == null && wishedWord != null);
 		
@@ -232,7 +214,7 @@ public class MessageManager {
 		context.setLastFunctionUsed(function);
 		context.setLastWishedWord(wishedWord);
 
-		return createMsg(context, resultToString(result));
+		return createMsg(context, result);
 	}
 
 	/**
@@ -242,100 +224,140 @@ public class MessageManager {
 	 * @param msg message from the user
 	 * @return Function
 	 */
-	private Function findFunction(String msg){
+	private Function findFunction(String msg, Context context){
 		
-		// setting
-		Iterator<String> setting_iterator = keywords_setting.iterator();
-		while(setting_iterator.hasNext()) {
-			if(msg.contains(setting_iterator.next())) {
-				return Function.SETTING;
+		
+		/*
+		 * SPEECH PATTERNS:
+		 * 
+		 * 
+		 * (x|y) means one of the option within the ()
+		 * ww is the wished word
+		 * ?x? means x is optional
+		 * 
+		 * (define|translate|spell|contain|start with|end with) ww
+		 * ?give me? (definition|spelling|translation|example|synonym) (of|for) ww
+		 * what(is|are|'s) ?a ?ww in (German|otherLanguages)
+		 * what does ww mean
+		 * how do you say ww in (German|otherLanguages)
+		 * what can you do
+		 * (set|change|put) ?the? (number|amount) of (words|results)
+		 */
+		
+		/*
+		 * regexExpression1 = ".*\\b(define|translate|spell|contain|start with|end with|contains|starts with|ends with)\\b .+"; // define word
+		 * regexExpression2 = ".*\\b(definition|spelling|translation|example( sentence)?|synonym)s?\\b \\b(of|for)\\b (.+)"; // definition of word
+		 * regexExpression3 = ".*what does (.+) mean.*"; // what does word mean?
+		 * regexExpression4 = ".+ in German.*"; // how do you say word in German?
+		 * regexExpression5 = ".*what( is| are|'s) (a )?.+";
+		 * regexExpressionSettings = ".*\\b(set|change|put)\\b (the )?\\b(number|amount)\\b of \\b(words|results)\\b.*"; // set numbr of words for definitions to 6
+		 * regexExpressionHelper = ".*what can you do.*";
+		*/
+		
+		
+		// finds foundFunction for expression1 		".*\\b(define|translate|spell|contain|start with|end with)\\b .+"
+		Pattern pattern = Pattern.compile(regexExpression1);
+		Matcher matcher = pattern.matcher(msg);
+		if (matcher.matches())
+		{
+			String functionKeyword= matcher.group(1);
+			
+			if(functionKeyword.contains("define")) {
+					return Function.DEFINITION;
+			}
+			if(functionKeyword.contains("translate")) {
+					return Function.TRANSLATION;
+			}
+			if(functionKeyword.contains("spell")) {
+					return Function.SPELLING;
+			}
+			if(functionKeyword.contains("contain")) {
+					return Function.SCRABBLE_CONTAIN;
+			}
+			if(functionKeyword.contains("start")) {
+					return Function.SCRABBLE_START;
+			}
+			if(functionKeyword.contains("end")) {
+					return Function.SCRABBLE_END;
+			}
+			
+		}
+		
+		// finds foundFunction for expression2 		".*\\b(definition|spelling|translation|example|synonym)s?\\b \\b(of|for)\\b .+"
+		pattern = Pattern.compile(regexExpression2);
+		matcher = pattern.matcher(msg);
+		if (matcher.matches())
+		{
+			String functionKeyword= matcher.group(1);
+			
+			if(functionKeyword.contains("definition")) {
+					return Function.DEFINITION;
+			}
+			if(functionKeyword.contains("translation")) {
+					return Function.TRANSLATION;
+			}
+			if(functionKeyword.contains("spelling")) {
+					return Function.SPELLING;
+			}
+			if(functionKeyword.contains("example")) {
+					return Function.EXAMPLE;
+			}
+			if(functionKeyword.contains("synonym")) {
+					return Function.SYNONYMS;
 			}
 		}
 		
-		// translation
-		Iterator<String> translation_iterator = keywords_translation.iterator();
-		int positionOfFunction;
-		while(translation_iterator.hasNext()) {
-			String tmp = translation_iterator.next();
-			if(msg.contains(tmp)) {
-				positionOfFunction = msg.lastIndexOf(tmp);
+		// finds function for expression 3 		".*what does (.+) mean.*"
+		pattern = Pattern.compile(regexExpression3);
+		matcher = pattern.matcher(msg);
+		if (matcher.matches())
+		{
+			return Function.DEFINITION;
+		}
+		// finds function for expression 4		".+ in German.*"
+		pattern = Pattern.compile(regexExpression4);
+		matcher = pattern.matcher(msg);
+		if (matcher.matches())
+		{
+			return Function.TRANSLATION;
+		}
+		
+		// find function for expression 5	 	".*what( is| are|'s) a? .+"
+		pattern = Pattern.compile(regexExpression5);
+		matcher = pattern.matcher(msg);
+		if (matcher.matches())
+		{
+			if(msg.contains("in german")) { // should not happen, because expression 4 is checked first
 				return Function.TRANSLATION;
 			}
-		}
-		
-		// definition
-		Iterator<String> definition_iterator = keywords_definition.iterator();
-		while(definition_iterator.hasNext()) {
-			String tmp = definition_iterator.next();
-			if(msg.contains(tmp)) {
-				positionOfFunction = msg.lastIndexOf(tmp);
+			else {
 				return Function.DEFINITION;
 			}
 		}
 		
-		// spelling
-		Iterator<String> spelling_iterator = keywords_spelling.iterator();
-		while(spelling_iterator.hasNext()) {
-			if(msg.contains(spelling_iterator.next())) {
-				return Function.SPELLING;
-			}
+		
+		// helper function
+		if(msg.matches(regexExpressionHelper)) {
+			return Function.WHATCANYOUDO;
 		}
 		
-		// synonyms
-		Iterator<String> synonyms_iterator = keywords_synonyms.iterator();
-		while(synonyms_iterator.hasNext()) {
-			if(msg.contains(synonyms_iterator.next())) {
-				return Function.SYNONYMS;
-			}
+		// SETTINGS
+		if(msg.matches(regexExpressionSettings)) { // new msg
+			return Function.SETTING;
+		}
+		if(msg.matches(".*(?:to )?([1-9]+).*") // settings follow up answer, number was missing
+				&& context.getLastFunctionUsed() == Function.SETTING) { // number was missing
+			return Function.SETTING;
+		}
+		if(msg.matches(".*\\b(definition|translation|synonym|example|scrabble function)s?\\b.*")
+				&& context.getLastFunctionUsed() == Function.SETTING) { // function was missing
+			return Function.SETTING;
 		}
 		
-		// scrabble_start
-		Iterator<String> scrabble_start_iterator = keywords_scrabble_start.iterator();
-		while(scrabble_start_iterator.hasNext()) {
-			if(msg.contains(scrabble_start_iterator.next())) {
-				return Function.SCRABBLE_START;
-			}
+		if(msg.matches(regexExpressionMore)) {
+			return Function.MORE;
 		}
-		
-		// scrabble_end
-		Iterator<String> scrabble_end_iterator = keywords_scrabble_end.iterator();
-		while(scrabble_end_iterator.hasNext()) {
-			if(msg.contains(scrabble_end_iterator.next())) {
-				return Function.SCRABBLE_END;
-			}
-		}
-		
-		// scrabble_contain
-		Iterator<String> scrabble_contain_iterator = keywords_scrabble_contain.iterator();
-		while(scrabble_contain_iterator.hasNext()) {
-			if(msg.contains(scrabble_contain_iterator.next())) {
-				return Function.SCRABBLE_CONTAIN;
-			}
-		}
-		
-		// example
-		Iterator<String> example_iterator = keywords_example.iterator();
-		while(example_iterator.hasNext()) {
-			if(msg.contains(example_iterator.next())) {
-				return Function.EXAMPLE;
-			}
-		}
-				
-		// WHAT CAN YOU DO?
-		Iterator<String> whatCanYouDo_iterator = keywords_whatCanYouDo.iterator();
-		while(whatCanYouDo_iterator.hasNext()) {
-			if(msg.contains(whatCanYouDo_iterator.next())) {
-				return Function.WHATCANYOUDO;
-			}
-		}
-		
-		// change preferred category
-		Iterator<String> changePrefCat_iterator = keywords_changePrefCat.iterator();
-		while(changePrefCat_iterator.hasNext()) {
-			if(msg.contains(changePrefCat_iterator.next())) {
-				return Function.CHANGE_PREF_CAT;
-			}
-		}
+	
 
 		return null;
 	}
@@ -357,67 +379,125 @@ public class MessageManager {
 	private String findWishedWord(String msg, Context context){
 		
 		String wishedWord;
-
-		try {
-			// *of* ; e.g. meaning/translation/spelling of
-			if (msg.contains("of")) {
-				wishedWord = msg.substring(msg.lastIndexOf("of") + 3);
-				context.setLastWishedWord(wishedWord);
-				return wishedWord;
-			}
+		
+		/*
+		 * SPEECH PATTERNS:
+		 * 
+		 * 
+		 * (x) means x is optional.
+		 * ww is the wished word
+		 * + connects strings
+		 * || means or (one of the options)
+		 * ?x? means x is optional
+		 * 
+		 * (define|translate|spell|contain|start with|end with) + ww
+		 * ?give me? (definition|spelling|translation|example|synonym) (of|for) ww
+		 * what(is|are|'s) ?a ?ww in (German|otherLanguages)
+		 * what does ww mean
+		 * how do you (define|spell) ww
+		 * how do you say ww in (German|otherLanguages)
+		 */
+		
+		/*
+		 * regexExpression1 = ".*\\b(define|translate|spell|contain|start with|end with)\\b .+"; // define word
+		 * regexExpression2 = ".*\\b(definition|spelling|translation|example|synonym)s?\\b \\b(of|for)\\b .+"; // definition of word
+		 * regexExpression3 = ".*what does .+ mean.*"; // what does word mean?
+		 * regexExpression4 = ".+ in German.*"; // how do you say word in German?
+		*/
+		
+		
+		// finds ww for expression1
+		Pattern pattern = Pattern.compile(regexExpression1);
+		Matcher matcher = pattern.matcher(msg);
+		if (matcher.matches())
+		{
+			int rightIndex = msg.indexOf(matcher.group(1)) + matcher.group(1).length(); // index of last word before ww
+			wishedWord = msg.substring( rightIndex , msg.length() ); // possible
+			wishedWord = wishedWord.trim(); // removes spaces at the start and end of string
+			wishedWord = wishedWord.replaceAll("[^a-zA-Z\\s]", ""); // removes all characters which arent letters or spaces
+			return wishedWord;
 		}
-		catch(Exception e) {}
-
-		try {
-			// *with*
-			if(msg.contains("with")) {
-				wishedWord = msg.substring(msg.lastIndexOf("with")+5);
-				context.setLastWishedWord(wishedWord);
-				return wishedWord;
-			}
+		
+		// finds ww for expression2
+		pattern = Pattern.compile(regexExpression2);
+		matcher = pattern.matcher(msg);
+		if (matcher.matches())
+		{
+			int rightIndex = msg.indexOf(matcher.group(3)) + matcher.group(3).length()+1; // index of last word before ww
+			wishedWord = msg.substring( rightIndex , msg.length() ); // possible
+			wishedWord = wishedWord.trim(); // removes spaces at the start and end of string
+			wishedWord = wishedWord.replaceAll("[^a-zA-Z\\s]", ""); // removes all characters which arent letters or spaces
+			return wishedWord;
 		}
-		catch(Exception e) {}
-
-		try {
-			// ** keywords after which is directly followed by the ww (translate, define, spell, contain)
-			if(msg.contains("translate")) {
-				wishedWord = msg.substring(msg.lastIndexOf("translate")+10);
-				context.setLastWishedWord(wishedWord);
-				return wishedWord;
-			}
+		
+		// finds ww for expression3
+		pattern = Pattern.compile(regexExpression3);
+		matcher = pattern.matcher(msg);
+		if (matcher.matches()) // if the msg matches the regex
+		{
+			wishedWord = matcher.group(1);
+			wishedWord = wishedWord.trim(); // removes spaces at the start and end of string
+			wishedWord = wishedWord.replaceAll("[^a-zA-Z\\s]", ""); // removes all characters which arent letters or spaces
+			return wishedWord;
 		}
-		catch(Exception e) {}
-
-		try {
-			if(msg.contains("define")) {
-				wishedWord = msg.substring(msg.lastIndexOf("define")+7);
-				context.setLastWishedWord(wishedWord);
-				return wishedWord;
-			}
+		
+		//find ww for expression 4
+		pattern = Pattern.compile(regexExpression4);
+		matcher = pattern.matcher(msg);
+		if (matcher.matches()) // if the msg matches the regex
+		{
+			wishedWord = matcher.group(1);
+			wishedWord = wishedWord.trim(); // removes spaces at the start and end of string
+			wishedWord = wishedWord.replaceAll("[^a-zA-Z\\s]", ""); // removes all characters which arent letters or spaces
+			return wishedWord;
 		}
-		catch(Exception e) {}
-
-		try {
-			if(msg.contains("spell")) {
-				wishedWord = msg.substring(msg.lastIndexOf("spell")+6);
-				context.setLastWishedWord(wishedWord);
-				return wishedWord;
-			}
+		
+		//find ww for expression 5
+		pattern = Pattern.compile(regexExpression5);
+		matcher = pattern.matcher(msg);
+		if (matcher.matches()) // if the msg matches the regex
+		{
+			wishedWord = matcher.group(3);
+			wishedWord = wishedWord.trim(); // removes spaces at the start and end of string
+			wishedWord = wishedWord.replaceAll("[^a-zA-Z\\s]", ""); // removes all characters which arent letters or spaces
+			return wishedWord;
 		}
-		catch(Exception e) {}
-
-		try {
-			if(msg.contains("contain")) {
-				wishedWord = msg.substring(msg.lastIndexOf("contain")+8);
-				context.setLastWishedWord(wishedWord);
-				return wishedWord;
-			}
+		
+		// msg which doesnt have a ww
+		if(msg.matches(regexExpressionHelper) || msg.matches(regexExpressionSettings)) {
+			context.setLastWishedWord(null);
+			return null;
 		}
-		catch(Exception e) {}
 
 		return context.getLastWishedWord();
 	}
 
+	/**
+	 * If the user asks for another function of the same word, he may refer to the word as
+	 * "this", "that", "it". If this is the case, the ww will be changed to the last ww (context)
+	 *
+	 * @param ww wished Word
+	 * @param context is needed in case it, that or this refers to last ww a request was made with
+	 * @param f is the function which was currently found
+	 * @return String ww the user probably means
+	 */
+	private String checkWishedWord(String ww, Context context, Function f) {
+		/*
+		 * These words may be a follow up question:
+		 * that, it
+		 */
+		if(ww == null || f == null) {
+			return null;
+		}
+		
+		if(ww.matches("(this|it|that)") && context.getLastFunctionUsed() != f) {
+			return context.getLastWishedWord();
+		}
+		
+		return ww;
+		
+	}
+	
 	/**
 	 * This method creates a message for the user after an appropriate answer was found.
 	 * The answer depends on the used function, wished word and the result.
@@ -426,36 +506,62 @@ public class MessageManager {
 	 * @param result output from the function
 	 * @return String the final message for the user
 	 */
-	private String createMsg(Context context, String result) {
+	private String createMsg(Context context, String[] resultAsArray) {
 
-	    if(result == null) {
+		String result = resultToString(resultAsArray);
+		if(result == null && context.getLastFunctionUsed()==Function.MORE) {
+			 return "Sorry, there are no more results.";
+		}
+		
+	    if(result == null || result.isEmpty()) {
 	        return "Sorry, we did not find any entry matching your query";
         }
 
 		switch(context.getLastFunctionUsed()) {
 			case TRANSLATION: 
+				if(resultAsArray.length>1) {
+					return "The translations of " + context.getLastWishedWord() + " are " + result;
+				}
 				return "The translation of " + context.getLastWishedWord() + " is " + result;
-			
+				
 			case DEFINITION:
+				if(resultAsArray.length>1) {
+					return "Definitions of " + context.getLastWishedWord() + " are " + result;
+				}
 				return "The definition is " + result;
-			
+				
 			case SPELLING:
 				return "" + context.getLastWishedWord() + " is spelled " + result;
-			
+				
 			case SYNONYMS:
-				return "Synonyms for " + context.getLastWishedWord() + " are " + result;
+				if(resultAsArray.length>1) {
+					return "Synonyms for " + context.getLastWishedWord() + " are " + result;
+				}
+				return "A synonym for " + context.getLastWishedWord() + " is " + result;
 
 			case EXAMPLE:
-				return "An Examples for " + context.getLastWishedWord() + " is " + result;
+				if(resultAsArray.length>1) {
+					return "Examples for " + context.getLastWishedWord() + " are " + result;
+				}
+				return "An example for " + context.getLastWishedWord() + " is " + result;
 			
 			case SCRABBLE_START:
-				return "Words which start with " + context.getLastWishedWord() + " are " + result;
+				if(resultAsArray.length>1) {
+					return "Words, which start with " + context.getLastWishedWord() + " are " + result;
+				}
+				return "A word, which starts with " + context.getLastWishedWord() + " is " + result;
 			
 			case SCRABBLE_CONTAIN:
-				return "Words which contain " + context.getLastWishedWord() + " are " + result;
+				if(resultAsArray.length>1) {
+					return "Words, which contain " + context.getLastWishedWord() + " are " + result;
+				}
+				return "A word, which contains " + context.getLastWishedWord() + " is " + result;
 			
 			case SCRABBLE_END:
-				return "Words which end with " + context.getLastWishedWord() + " are " + result;
+				if(resultAsArray.length>1) {
+					return "Words, which end with " + context.getLastWishedWord() + " are " + result;
+				}
+				return "A word, which ends with " + context.getLastWishedWord() + " is " + result;
 			
 			case SETTING:
 				return "";
@@ -463,8 +569,13 @@ public class MessageManager {
 			// may have to be adjusted for added functions
 			case WHATCANYOUDO:
 				return "The dictionary skill can give translations, definitions, synonyms, spellings, "
-						+ "example sentences and change the number of words for your results.";
+						+ "example sentences, change the number of words for your results and give you more results for your last request.";
 			
+			case MORE:
+				if(result != null) {
+					return result;
+				}
+				
 			default:
 				return "Error: Message could not be created.";
 		}
@@ -503,20 +614,46 @@ public class MessageManager {
 	 * @param ww wished word
 	 * @return String shortened wished word
 	 */
-	private String shortenWishedWord(String ww) {
+	private String shortenWishedWord(String ww, String originalMsg) {
 
-		int shortenPosTo = ww.length();
-		
-		// finds the position of the first " " starting from the end/right of the ww
-		while( shortenPosTo > 0 && !(ww.substring(shortenPosTo-1, shortenPosTo).equals(" ") )) {
-			shortenPosTo--;
-		}
-
-		if(shortenPosTo < 1 || shortenPosTo == ww.length()) {
+		if(ww == null) {
 			return null;
 		}
-		else {
-			return ww.substring(0, shortenPosTo-1);
+		
+		if(originalMsg.matches("(.+) in german.*") || originalMsg.matches(".*what does (.+) mean.*")) { // then shorten from left
+			
+			int shortenPosTo = 0;
+			
+			// finds the position of the first " " starting from the start/left of the ww
+			while( shortenPosTo < ww.length() && !(ww.substring(shortenPosTo, shortenPosTo+1).equals(" ") )) {
+				shortenPosTo++;
+			}
+
+			if(shortenPosTo == 0) {
+				return null;
+			}
+			else {
+				return ww.substring(shortenPosTo+1, ww.length());
+			}
+			
 		}
+		else { // shorten from right
+			
+			int shortenPosTo = ww.length();
+			
+			// finds the position of the first " " starting from the end/right of the ww
+			while( shortenPosTo > 0 && !(ww.substring(shortenPosTo-1, shortenPosTo).equals(" ") )) {
+				shortenPosTo--;
+			}
+
+			if(shortenPosTo < 1 || shortenPosTo == ww.length()) {
+				return null;
+			}
+			else {
+				return ww.substring(0, shortenPosTo-1);
+			}
+			
+		}
+		
 	}
 }
