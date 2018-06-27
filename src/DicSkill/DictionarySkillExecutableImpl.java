@@ -11,17 +11,25 @@ public class DictionarySkillExecutableImpl extends ASkillExecutable implements S
 	protected SpeechOut speechOut = null;
 
 	private final Object lockObject = new Object();
+	
+	private State state = null;
+	private Context context = null;
+	private Settings settings = null;
+	private DatabaseCommunicator dbC = null;
+	private MessageManager tb = null;
 
-	public DictionarySkillExecutableImpl(SpeechOut speechOut) {
+	public DictionarySkillExecutableImpl(SpeechOut speechOut, State state, Context context, Settings settings, DatabaseCommunicator dbC, MessageManager tb) {
 		super(skillId);
 		this.speechOut = speechOut;
+		this.state = state;
+		this.context = context;
+		this.settings = settings;
+		this.dbC = dbC;
+		this.tb = tb;
 	}
-	
-	MessageManager tb = null;
 	
 	//actual code to run when activated
 	public void doRun() {
-		tb = new MessageManager();
 		
 		//text to be spoken
 		this.speechOut.setOutputText(this, tb.decodeMsg(speechOut.toString(), settings, dbC, context), false);
