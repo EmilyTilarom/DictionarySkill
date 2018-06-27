@@ -3,6 +3,15 @@ package DicSkill;
 import java.util.Scanner;
 
 /**
+ * 26.06.2018
+ * NEW:
+ * -	Object of class state is now given to msgmanager, which will save Settings and context
+ * TO DO:
+ * -	adapt, so the message may be received from the main system
+ * @author Lia
+ */
+
+/**
  * 03.06.2018
  * NEW:
  * -	Class will now save and load settings and context
@@ -10,7 +19,6 @@ import java.util.Scanner;
  * -	adapt, so the message may be received from the main system
  * -	reconsider when context and settings shall be saved.
  * @author Lia
- *
  */
 
 /**
@@ -40,7 +48,7 @@ public class DictionarySkill {
 		
 		while(!msg.equals("bye"))
 		{
-			System.out.println( tb.decodeMsg(msg, settings, dbC, context) );
+			System.out.println( tb.decodeMsg(msg, settings, dbC, context, state) );
 			msg = read.nextLine().toLowerCase();
 
 		}

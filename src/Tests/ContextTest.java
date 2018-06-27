@@ -1,4 +1,11 @@
 /**
+ * 26.06.2018
+ * NEW:
+ * -    made necessary changes due to additional parameter for decode msg, parameter being an Object of class "State"
+ * @author Lia
+ */
+
+/**
  * 16.06.2018
  * NEW:
  * -    Added test case for all public functions
@@ -22,7 +29,7 @@ import org.junit.Test;
 public class ContextTest {
 
     private Context con;
-
+    private State state;
     private MessageManager mm;
     private Settings settings;
     private DatabaseCommunicator databaseCom;
@@ -31,7 +38,7 @@ public class ContextTest {
     public void setUp() throws Exception {
 
         con = new Context();
-
+        state = new State();
         mm = new MessageManager();
         settings = new Settings();
         databaseCom = new DatabaseCommunicator();
@@ -111,17 +118,17 @@ public class ContextTest {
 
         ww = "dog";
         message = "What is the definition of " + ww;
-        mm.decodeMsg(message, settings, databaseCom, con);
+        mm.decodeMsg(message, settings, databaseCom, con, state);
         Assert.assertEquals(con.getLastWishedWord(), ww);
 
         ww = "cat";
         message = "What is the definition of " + ww + " please i need the answer";
-        mm.decodeMsg(message, settings, databaseCom, con);
+        mm.decodeMsg(message, settings, databaseCom, con, state);
         Assert.assertEquals(con.getLastWishedWord(), ww);
 
         ww = "enlightenment";
         message = "Give me an example of" + ww;
-        mm.decodeMsg(message, settings, databaseCom, con);
+        mm.decodeMsg(message, settings, databaseCom, con, state);
         Assert.assertEquals(con.getLastWishedWord(), ww);
     }
 
@@ -133,17 +140,17 @@ public class ContextTest {
 
         function = "definition of";
         message = "What is the " + function + " dog";
-        mm.decodeMsg(message, settings, databaseCom, con);
+        mm.decodeMsg(message, settings, databaseCom, con, state);
         Assert.assertEquals(con.getLastFunctionUsed(), Function.DEFINITION);
 
         function = "definition of";
         message = "What is the " + function + " cat please i need the answer";
-        mm.decodeMsg(message, settings, databaseCom, con);
+        mm.decodeMsg(message, settings, databaseCom, con, state);
         Assert.assertEquals(con.getLastWishedWord(), Function.DEFINITION);
 
         function = "example of";
         message = "Give me an " + function + " walking";
-        mm.decodeMsg(message, settings, databaseCom, con);
+        mm.decodeMsg(message, settings, databaseCom, con, state);
         Assert.assertEquals(con.getLastWishedWord(), Function.EXAMPLE);
     }
 }
