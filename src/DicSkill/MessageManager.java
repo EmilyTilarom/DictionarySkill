@@ -197,7 +197,19 @@ public class MessageManager {
 					state.save(settings, context);
 					break;
 				case MORE:
-					result = dbC.getMoreResults(settings.getNOW(context.getLastFunctionUsed()));
+					/*
+					 * if result is null, there were no more results
+					 * if NOW_more equals 0, the user cant request more for the last function. (result cant be null for msg handling)
+					 * if result isn't null, but NOW_more is NOT 0, more results will be returned
+					 */
+					int NOW_more = settings.getNOW(context.getLastFunctionUsed());
+					if(NOW_more == 0) { 
+						result = new String[1];
+						result[0] = "0";
+					}
+					else {
+						result = dbC.getMoreResults(NOW_more);
+					}
 					break;
 				default:
 					result = new String[1];
@@ -211,7 +223,8 @@ public class MessageManager {
 		}while(result == null && wishedWord != null);
 		
 		// Updates the context
-		context.setLastFunctionUsed(function);
+		if(function != Function.MORE) // if last used function was MORE, requesting more results again is not possible, therefore keep old value
+			context.setLastFunctionUsed(function);
 		context.setLastWishedWord(wishedWord);
 
 		return createMsg(context, result);
@@ -509,14 +522,22 @@ public class MessageManager {
 	private String createMsg(Context context, String[] resultAsArray) {
 
 		String result = resultToString(resultAsArray);
+		
+		// In case more results were requested but not found
 		if(result == null && context.getLastFunctionUsed()==Function.MORE) {
 			 return "Sorry, there are no more results.";
 		}
+		// In case more results were requested, but the function called before does not provide more results
+		if(context.getLastFunctionUsed()==Function.MORE && result.equals("0 ")) {
+			return "You can't get more results for this function.";
+		}
 		
+		// In case no results were found for the ww
 	    if(result == null || result.isEmpty()) {
 	        return "Sorry, I don't have any results for your request.";
         }
 
+	    // Answer depending on function called
 		switch(context.getLastFunctionUsed()) {
 			case TRANSLATION: 
 				if(resultAsArray.length>1) {
@@ -598,7 +619,12 @@ public class MessageManager {
 		StringBuilder allResults = new StringBuilder();
 
 		for(int i=0; i<result.length; i++) {
-			allResults.append(result[i]).append(" ");
+			if(i == result.length-1) {
+				allResults.append(result[i]).append(".");
+			}
+			else {
+				allResults.append(result[i]).append(", ");
+			}
 		}
 		
 		return allResults.toString();
