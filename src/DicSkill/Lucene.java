@@ -502,7 +502,7 @@ public class Lucene {
 		
 		
 	}
-
+	
 	public String[] getLeftoverResults() {
 		return removeInvalidChars(leftoverResults);
 	}

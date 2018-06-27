@@ -229,7 +229,6 @@ public class Settings implements Serializable
 			case SCRABBLE_CONTAIN:
 				return getNOW_scrabble();
 			default:
-				System.out.println("You can't get more results for this function.");
 				return 0;
 		}
 	}

@@ -1,7 +1,15 @@
 package DicSkill;
 
 import java.util.ArrayList;
+import java.util.Arrays;
+import rita.RiWordNet;
 
+/**
+ * 27.06.2018
+ * NEW:
+ * - 	improved ritas output for the scrabbe function (e.g. only returns results without special characters)
+ * @author Lia
+ */
 /**
  * 26.06.2018
  * NEW:
@@ -62,7 +70,7 @@ import java.util.ArrayList;
  *
  */
 
-import rita.RiWordNet;
+
 
 /**
  * DatabaseCommunicator gets function specific calls. The databases will be searched accordingly
@@ -81,6 +89,7 @@ public class DatabaseCommunicator {
 	private final Lucene lucene;
 	private String pos;                // Rita specific: PartsOfSpeech. e.g.: noun, adjective, verb ...
 	private String[] leftoverResults;
+	private int MAX_RESULTS = 100; // otherwise there will be no leftover result for scrabble functions
 
 	/** Constructor **/
 	public DatabaseCommunicator() {
@@ -290,10 +299,33 @@ public class DatabaseCommunicator {
 	public String[] scrabble_start(String letters, int NOW) {
 
 		String result[];
-
+		
+		// adds results from rita to arraylist, because arraylist can be searched better
 		pos = ritaDB.getBestPos(letters);
-		result = ritaDB.getStartsWith(letters, pos, NOW);
-
+		ArrayList<String> unfilteredResults = new ArrayList<String>(Arrays.asList(ritaDB.getStartsWith(letters, pos, MAX_RESULTS)));
+		
+		/*
+		 * Results with 
+		 * 		-	special characters (e.g.: "a.e.")
+		 * 		-	a space after the sequence of letters (e.g.: "a horizon")
+		 *	are removed from the ArrayList of results
+		 */
+		int counter = 0; // using this instead of for each loop because of java.util.ConcurrentModificationException
+		while(counter < unfilteredResults.size()) {
+			// if the result is not a sequence of letters which starts with letters, delete the result
+			if(!unfilteredResults.get(counter).matches("^"+letters+"[A-Za-z][ A-Za-z]*$")) {
+				unfilteredResults.remove(counter);
+			}
+			else {
+				counter++;
+			}
+		}
+		
+		// results are copied to String[] results
+		result = new String[unfilteredResults.size()];
+		result = unfilteredResults.toArray(result);
+		
+		// adds leftover results to String[] leftover results and NOW results
 		result = extractArray(result, NOW);
 
 		return result;
@@ -309,10 +341,33 @@ public class DatabaseCommunicator {
 	public String[] scrabble_end(String letters, int NOW) {
 
 		String result[];
-
+		
+		// adds results from rita to arraylist, because arraylist can be searched better
 		pos = ritaDB.getBestPos(letters);
-		result = ritaDB.getEndsWith(letters, pos, NOW);
-
+		ArrayList<String> unfilteredResults = new ArrayList<String>(Arrays.asList(ritaDB.getStartsWith(letters, pos, MAX_RESULTS)));
+		
+		/*
+		 * Results with 
+		 * 		-	special characters (e.g.: "a.e.")
+		 * 		-	a space before the sequence of letters (e.g.: "xyz a")
+		 *	are removed from the ArrayList of results
+		 */
+		int counter = 0; // using this instead of for each loop because of java.util.ConcurrentModificationException
+		while(counter < unfilteredResults.size()) {
+			// if the result is not a sequence of letters which starts with letters, delete the result
+			if(!unfilteredResults.get(counter).matches("^[ A-Za-z]*[A-Za-z]+"+letters+"$")) {
+				unfilteredResults.remove(counter);
+			}
+			else {
+				counter++;
+			}
+		}
+		
+		// results are copied to String[] results
+		result = new String[unfilteredResults.size()];
+		result = unfilteredResults.toArray(result);
+		
+		// adds leftover results to String[] leftover results and NOW results
 		result = extractArray(result, NOW);
 
 		return result;
@@ -328,10 +383,33 @@ public class DatabaseCommunicator {
 	public String[] scrabble_contain(String letters, int NOW) {
 
 		String result[];
-
+		
+		// adds results from rita to arraylist, because arraylist can be searched better
 		pos = ritaDB.getBestPos(letters);
-		result = ritaDB.getContains(letters, pos, NOW);
-
+		ArrayList<String> unfilteredResults = new ArrayList<String>(Arrays.asList(ritaDB.getStartsWith(letters, pos, MAX_RESULTS)));
+		
+		/*
+		 * Results with (examples for letters=a)
+		 * 		-	special characters (e.g.: "a.e.")
+		 * 		-	a space before or after the sequence of letters (e.g.: "a horizon")
+		 *	are removed from the ArrayList of results
+		 */
+		int counter = 0; // using this instead of for each loop because of java.util.ConcurrentModificationException
+		while(counter < unfilteredResults.size()) {
+			// if the result is not a sequence of letters which starts with letters, delete the result
+			if(!unfilteredResults.get(counter).matches("^[A-Za-z ]*[A-Za-z]+"+letters+"[A-Za-z]+[ A-Za-z]*$")) {
+				unfilteredResults.remove(counter);
+			}
+			else {
+				counter++;
+			}
+		}
+		
+		// results are copied to String[] results
+		result = new String[unfilteredResults.size()];
+		result = unfilteredResults.toArray(result);
+		
+		// adds leftover results to String[] leftover results and NOW results
 		result = extractArray(result, NOW);
 
 		return result;
@@ -352,11 +430,11 @@ public class DatabaseCommunicator {
 			System.arraycopy(leftoverResults, 0, returnArray, 0, returnArray.length);
 			String[] tmpArray = new String[leftoverResults.length-NOW];
 			System.arraycopy(leftoverResults, returnArray.length, tmpArray, 0, tmpArray.length);
-			leftoverResults = tmpArray;
+			leftoverResults = tmpArray.clone();
 		}
 		else {
 			// "copies" all results from leftoverResults to returnArray and then deletes content of leftoverResults
-			returnArray = leftoverResults;
+			returnArray = leftoverResults.clone();
 			leftoverResults = null;
 		}
 
