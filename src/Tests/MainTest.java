@@ -7,9 +7,9 @@ public class MainTest {
 
     public static void main(String[]args) {
 
-//        Result result0 = testMessageManager();
+        Result result0 = testMessageManager();
 
-  //      Result result1 = testDatabaseCommunicator();
+        Result result1 = testDatabaseCommunicator();
 
         Result result2 = testContext();
 
