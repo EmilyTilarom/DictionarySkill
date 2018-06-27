@@ -339,7 +339,7 @@ public class DatabaseCommunicator {
 
 	public String[] getMoreResults(int NOW) {
 		
-		if(leftoverResults == null) {
+		if(leftoverResults == null || leftoverResults.length == 0) {
 			return null;
 		}
 		
@@ -351,7 +351,7 @@ public class DatabaseCommunicator {
 			// copies NOW results from leftoverResults to returnArray, then shortens leftoverResults
 			System.arraycopy(leftoverResults, 0, returnArray, 0, returnArray.length);
 			String[] tmpArray = new String[leftoverResults.length-NOW];
-			System.arraycopy(leftoverResults, returnArray.length-1, tmpArray, 0, tmpArray.length);
+			System.arraycopy(leftoverResults, returnArray.length, tmpArray, 0, tmpArray.length);
 			leftoverResults = tmpArray;
 		}
 		else {

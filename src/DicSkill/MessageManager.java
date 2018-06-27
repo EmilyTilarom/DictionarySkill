@@ -490,7 +490,7 @@ public class MessageManager {
 			return null;
 		}
 		
-		if(ww.matches("(this|it|that)") && context.getLastFunctionUsed() != f) {
+		if(ww.matches("(this|it|that).*") && context.getLastFunctionUsed() != f) {
 			return context.getLastWishedWord();
 		}
 		
@@ -514,7 +514,7 @@ public class MessageManager {
 		}
 		
 	    if(result == null || result.isEmpty()) {
-	        return "Sorry, we did not find any entry matching your query";
+	        return "Sorry, I don't have any results for your request.";
         }
 
 		switch(context.getLastFunctionUsed()) {
