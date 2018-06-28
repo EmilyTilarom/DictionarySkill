@@ -24,7 +24,7 @@ import org.junit.Test;
  */
 public class PerformanceTest {
 
-    public static long MAX_TIME = 2;                // Maximum time for a query to be processed
+    public static long MAX_TIME = 1;                // Maximum time for a query to be processed
 
     private MessageManager mm;
     private State state;

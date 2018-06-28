@@ -30,8 +30,11 @@ public class MainTest {
         if(result.getFailureCount() == 0) {
             System.out.println("    -> All queries take no longer than " +  PerformanceTest.MAX_TIME + " seconds");
         }
+        else {
+            System.out.println("    -> Some queries take longer than " +  PerformanceTest.MAX_TIME + " seconds");
+        }
 
-        System.out.println("--- Finished testing Performance. Some queries take longer than " +  PerformanceTest.MAX_TIME + " seconds ---\n");
+        System.out.println("--- Finished testing Performance ---\n");
 
         return result;
     }

@@ -197,7 +197,7 @@ public class DatabaseCommunicator {
 		}
 		catch(Exception e) {}
 		
-		result = sortByPrefCategoryFirst(context, result);
+		// result = sortByPrefCategoryFirst(context, result);
 		
 		result = extractArray(result, NOW);
 		
@@ -443,7 +443,7 @@ public class DatabaseCommunicator {
 	 * This function is called, when the context is used.
 	 * For example if the user wants to get more results to the last synonym.
 	 *
-	 * @param conext to get the preferred categories
+	 * @param context to get the preferred categories
 	 * @param results, which contains the results received by the database
 	 * @return results sorted by preferred category first
 	 */

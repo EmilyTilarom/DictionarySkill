@@ -28,7 +28,6 @@ import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 
-
 /**
  * These tests run multiple number of different Strings paired
  * with multiple numbers for the expected number of outputs (now).
