@@ -2,9 +2,7 @@
  * 27.06.2018
  * NEW:
  * -    Performance test cases
- *
  * @author Walter
- *
  */
 
 package Tests;
@@ -24,7 +22,7 @@ import org.junit.Test;
  */
 public class PerformanceTest {
 
-    public static long MAX_TIME = 2;                // Maximum time for a query to be processed
+    public static double MAX_TIME = 1.0;                // Maximum time for a query to be processed
 
     private MessageManager mm;
     private State state;
@@ -56,14 +54,15 @@ public class PerformanceTest {
 
         String message = "What is the definition of luck";
 
-        long startTime = System.currentTimeMillis();
+        double startTime = System.currentTimeMillis();
 
         mm.decodeMsg(message, settings, databaseCom, context, state);
 
-        long endTime = System.currentTimeMillis();
-        long duration = (endTime - startTime) / 1000;      // Transform to seconds
+        double endTime = System.currentTimeMillis();
+        double duration = (endTime - startTime) / 1000;      // Convert from miliseconds to seconds
 
-        Assert.assertTrue(duration < MAX_TIME);
+        System.out.println("Definitions take "+duration+" seconds.");
+        Assert.assertTrue(duration <= MAX_TIME);
     }
 
     @Test
@@ -71,14 +70,15 @@ public class PerformanceTest {
 
         String message = "What is the translation of hardware";
 
-        long startTime = System.currentTimeMillis();
+        double startTime = System.currentTimeMillis();
 
         mm.decodeMsg(message, settings, databaseCom, context, state);
 
-        long endTime = System.currentTimeMillis();
-        long duration = (endTime - startTime) / 1000;      // Transform to seconds
+        double endTime = System.currentTimeMillis();
+        double duration = (endTime - startTime) / 1000;      // Convert from miliseconds to seconds
 
-        Assert.assertTrue(duration < MAX_TIME);
+        System.out.println("Translations take "+duration+" seconds.");
+        Assert.assertTrue(duration <= MAX_TIME);
     }
 
     @Test
@@ -86,14 +86,15 @@ public class PerformanceTest {
 
         String message = "please give me synonyms of true";
 
-        long startTime = System.currentTimeMillis();
+       	double startTime = System.currentTimeMillis();
 
         mm.decodeMsg(message, settings, databaseCom, context, state);
 
-        long endTime = System.currentTimeMillis();
-        long duration = (endTime - startTime) / 1000;      // Transform to seconds
+        double endTime = System.currentTimeMillis();
+        double duration = (endTime - startTime) / 1000;      // Convert from miliseconds to seconds
 
-        Assert.assertTrue(duration < MAX_TIME);
+        System.out.println("Synonyms take "+duration+" seconds.");
+        Assert.assertTrue(duration <= MAX_TIME);
     }
 
     @Test
@@ -101,14 +102,15 @@ public class PerformanceTest {
 
         String message = "examples of happy yes margaret, i will bring out the trash";
 
-        long startTime = System.currentTimeMillis();
+        double startTime = System.currentTimeMillis();
 
         mm.decodeMsg(message, settings, databaseCom, context, state);
 
-        long endTime = System.currentTimeMillis();
-        long duration = (endTime - startTime) / 1000;      // Transform to seconds
+        double endTime = System.currentTimeMillis();
+        double duration = (endTime - startTime) / 1000;      // Convert from miliseconds to seconds
 
-        Assert.assertTrue(duration < MAX_TIME);
+        System.out.println("Examples take "+duration+" seconds.");
+        Assert.assertTrue(duration <= MAX_TIME);
     }
 
     @Test
@@ -116,29 +118,31 @@ public class PerformanceTest {
 
         String message = "please spell bright";
 
-        long startTime = System.currentTimeMillis();
+        double startTime = System.currentTimeMillis();
 
         mm.decodeMsg(message, settings, databaseCom, context, state);
 
-        long endTime = System.currentTimeMillis();
-        long duration = (endTime - startTime) / 1000;      // Transform to seconds
+        double endTime = System.currentTimeMillis();
+        double duration = (endTime - startTime) / 1000;      // Convert from miliseconds to seconds
 
-        Assert.assertTrue(duration < MAX_TIME);
+        System.out.println("Spellings take "+duration+" seconds.");
+        Assert.assertTrue(duration <= MAX_TIME);
     }
 
     @Test
     public void testScrabble_StartOnPerformance() {
 
-        String message = "words that start with joy yes margaret, i will bring out the trash";
+        String message = "words that start with a yes margaret, i will bring out the trash";
 
-        long startTime = System.currentTimeMillis();
+        double startTime = System.currentTimeMillis();
 
         mm.decodeMsg(message, settings, databaseCom, context, state);
 
-        long endTime = System.currentTimeMillis();
-        long duration = (endTime - startTime) / 1000;      // Transform to seconds
-
-        Assert.assertTrue(duration < MAX_TIME);
+        double endTime = System.currentTimeMillis();
+        double duration = (endTime - startTime) / 1000;      // Convert from miliseconds to seconds
+        
+        System.out.println("Scrabble functions take "+duration+" seconds.");
+        Assert.assertTrue(duration <= MAX_TIME);
     }
 
     @Test
@@ -146,14 +150,15 @@ public class PerformanceTest {
 
         String message = "What can you do";
 
-        long startTime = System.currentTimeMillis();
+        double startTime = System.currentTimeMillis();
 
         mm.decodeMsg(message, settings, databaseCom, context, state);
 
-        long endTime = System.currentTimeMillis();
-        long duration = (endTime - startTime) / 1000;      // Transform to seconds
+        double endTime = System.currentTimeMillis();
+        double duration = (endTime - startTime) / 1000;      // Convert from miliseconds to seconds
 
-        Assert.assertTrue(duration < MAX_TIME);
+        System.out.println("Helper function takes "+duration+" seconds.");
+        Assert.assertTrue(duration <= MAX_TIME);
     }
 
     /**
@@ -165,14 +170,15 @@ public class PerformanceTest {
         String message = "examples of happy";
         mm.decodeMsg(message, settings, databaseCom, context, state);
 
-        long startTime = System.currentTimeMillis();
+        double startTime = System.currentTimeMillis();
 
         message = "more results";
         mm.decodeMsg(message, settings, databaseCom, context, state);
 
-        long endTime = System.currentTimeMillis();
-        long duration = (endTime - startTime) / 1000;      // Transform to seconds
+        double endTime = System.currentTimeMillis();
+        double duration = (endTime - startTime) / 1000;      // Convert from miliseconds to seconds
 
-        Assert.assertTrue(duration < MAX_TIME);
+        System.out.println("Asking for more results takes "+duration+" seconds.");
+        Assert.assertTrue(duration <= MAX_TIME);
     }
 }

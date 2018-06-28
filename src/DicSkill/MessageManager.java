@@ -101,7 +101,7 @@ public class MessageManager {
 	String regexExpressionCategory;
 	
 
-	/** Constructor **/
+	/** CONSTRUCTOR **/
 	public MessageManager() {
 		
 		
@@ -113,7 +113,8 @@ public class MessageManager {
 		regexExpression5 = ".*what( is| are|'s) (a )?(.+)";
 		
 		// settings
-		regexExpressionSettings = ".*\\b(set|change|put)\\b (the )?\\b(number|amount)\\b of \\b(words|results)\\b.*"; // set numbr of words for definitions to 6
+		regexExpressionSettings = ".*\\b(set|change|put)\\b (the )?\\b(settings|\\b(number|amount)\\b of \\b(words|results)\\b).*"; // set number of words for definitions to 6
+		//regexExpressionSettings = ".*([1-9])([0-9]*) \\b(number of |amount of )\\b\\b(words|results)\\b( for )?.*"; // other way to change settings?
 		
 		// helper function
 		regexExpressionHelper = ".*what can you do.*";
@@ -125,7 +126,7 @@ public class MessageManager {
 		regexExpressionCategory = "^.*([ a-zA-Z]*)( to| from)?( my | the )?(preferred category|preferred categories).*$";
 	}
 
-	/** Methods **/
+	/** METHODS **/
 
     /**
 	 * This method is the primary method for the interface. A message is received and
@@ -169,7 +170,6 @@ public class MessageManager {
 					break;
 				case DEFINITION:
 					result = dbC.define(wishedWord, settings.getNOW_definition(), context);
-					state.save(settings, context);
 					break;
 				case SPELLING:
 					result = dbC.spell(wishedWord);
@@ -193,7 +193,6 @@ public class MessageManager {
 					settings.setNOW(msg);
 					result = new String[1];
 					result[0] = "";
-					state.save(settings, context);
 					break;
 				case WHATCANYOUDO:
 					result = new String[1];
@@ -203,7 +202,6 @@ public class MessageManager {
 					context.changePrefCat(msg);
 					result = new String[1];
 					result[0] = "";
-					state.save(settings, context);
 					break;
 				case MORE:
 					/*
@@ -226,15 +224,18 @@ public class MessageManager {
 					System.out.println("Sorry, message could not be computed.");
 				}
 			
-			if(result == null)
+			if(result == null && (wishedWord != context.getLastWishedWord())) {
 				wishedWord = shortenWishedWord(wishedWord, msg); // removes the last word from the wished word
+			}
 
-		}while(result == null && wishedWord != null);
+		}while(result == null && wishedWord != null && function != function.MORE);
 		
 		// Updates the context
-		if(function != Function.MORE) // if last used function was MORE, requesting more results again is not possible, therefore keep old value
+		if(function != Function.MORE || (result == null && function == Function.MORE)) { // if last used function was MORE, requesting more results again is not possible, therefore keep old value
 			context.setLastFunctionUsed(function);
+		}
 		context.setLastWishedWord(wishedWord);
+		state.save(settings, context);
 
 		return createMsg(context, result);
 	}
@@ -534,7 +535,7 @@ public class MessageManager {
 		
 		// In case more results were requested but not found
 		if(result == null && context.getLastFunctionUsed()==Function.MORE) {
-			 return "Sorry, there are no more results.";
+			 return "Sorry, there are no more results for your request.";
 		}
 		// In case more results were requested, but the function called before does not provide more results
 		if(context.getLastFunctionUsed()==Function.MORE && result.equals("0 ")) {

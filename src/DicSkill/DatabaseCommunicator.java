@@ -92,7 +92,13 @@ public class DatabaseCommunicator {
 	private final Lucene lucene;
 	private String pos;                	// Rita specific: PartsOfSpeech. e.g.: noun, adjective, verb ...
 	private String[] leftoverResults;	// otherwise there will be no leftover result for spelling
-	private int MAX_RESULTS = 100; 		// need this, otherwise there will be no leftover results for scrabble functions (searches for specific amount of results directly)
+	
+	/*
+	 *  need MAX_RESULTS to improve performance for scrabble functions significantly. 
+	 *  Having no limit, will usually result in faster response, however there are 
+	 *  several seconds(!) waiting time upon the first request which would not meet the requirements.
+	 */
+	private int MAX_RESULTS = 100; 		
 
 	/** CONSTRUCTOR **/
 	public DatabaseCommunicator() {

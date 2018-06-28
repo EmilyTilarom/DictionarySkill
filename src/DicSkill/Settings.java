@@ -148,6 +148,7 @@ public class Settings implements Serializable
 		if(matcher.matches()) {
 			String number = matcher.group().replaceAll("\\D*",""); // gets number from msg
 			lastFailedNumberChange = Integer.parseInt(number); //remember number
+			newNOW = lastFailedNumberChange;
 			System.out.print("What function do you want to change the number of results for? You may choose: definitions, translations, synonyms, example, scrabble or all.");
 		}
 		// if number was not named, but function was
@@ -156,6 +157,7 @@ public class Settings implements Serializable
 		matcher = pattern.matcher(msg);
 		if(matcher.matches()) {
 			lastFailedFunctionChange = matcher.group(5); //remember function
+			foundFunction = lastFailedFunctionChange;
 			System.out.print("What number do you want to set it to?");
 		}
 		
@@ -181,7 +183,7 @@ public class Settings implements Serializable
 		
 		
 		if(newNOW==-1 && foundFunction==null) {
-			System.out.print("Sorry, you need to be more precise.");
+			System.out.print("Sorry, you need to be more precise. I need to know how many results you want to set for which function.");
 		}
 		
 	}
