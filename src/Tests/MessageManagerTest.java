@@ -110,12 +110,12 @@ public class MessageManagerTest {
         // Looking for context
         message = "provide me with more words";
         result = mm.decodeMsg(message, settings, databaseCom, context, state);
-        Assert.assertEquals("The translation of beautiful is wunderhÃ¼bsch." ,result);
+        Assert.assertEquals("The translation of beautiful is wunderhübsch." ,result);
 
         // Keep looking for context
         message = "provide me with even more words";
         result = mm.decodeMsg(message, settings, databaseCom, context, state);
-        Assert.assertEquals("The translation of beautiful is wunderschÃ¶n.", result);
+        Assert.assertEquals("The translation of beautiful is wunderschön.", result);
 
         // Evaluate if wished words was remembered
         message = "what are synonyms for it";
@@ -141,7 +141,7 @@ public class MessageManagerTest {
         result = mm.decodeMsg(message, settings, databaseCom, context, state);
         message = "what is the translation of great";
         result = mm.decodeMsg(message, settings, databaseCom, context, state);
-        Assert.assertEquals("The translations of great are groÃŸ, bedeutend, groÃŸartig, fabelhaft, fantastisch, phantastisch." ,result);
+        Assert.assertEquals("The translations of great are groß, bedeutend, großartig, fabelhaft, fantastisch, phantastisch." ,result);
 
         // Retverting changes for other tests
         message = "set the number of words for definitions to 1";
@@ -166,7 +166,7 @@ public class MessageManagerTest {
         // Long trail before
         message = "What is the translation of luck";
         result = mm.decodeMsg(message, settings, databaseCom, context, state);
-        Assert.assertEquals("The translation of luck is GlÃ¼ck." , result);
+        Assert.assertEquals("The translation of luck is Glück." , result);
 
         // Long trail after
         message = "translation of cool What the fuck jimmy put that down instantly or i will";

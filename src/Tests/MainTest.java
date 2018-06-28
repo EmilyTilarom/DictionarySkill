@@ -1,5 +1,7 @@
 package Tests;
 
+import java.util.ArrayList;
+
 import org.junit.runner.*;
 import org.junit.runner.notification.Failure;
 
@@ -31,7 +33,8 @@ public class MainTest {
             System.out.println("    -> All queries take no longer than " +  PerformanceTest.MAX_TIME + " seconds");
         }
 
-        System.out.println("--- Finished testing Performance. Some queries take longer than " +  PerformanceTest.MAX_TIME + " seconds ---\n");
+        System.out.println("--- Finished testing Performance.");
+        //System.out.println("--- Finished testing Performance. Some queries take longer than " +  PerformanceTest.MAX_TIME + " seconds ---\n");
 
         return result;
     }
@@ -92,4 +95,6 @@ public class MainTest {
 
         return result;
     }
+
+   
 }

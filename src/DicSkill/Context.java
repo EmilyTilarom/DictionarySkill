@@ -130,7 +130,7 @@ public class Context implements Serializable {
 	 * @param cat category the user wants to add
 	 */
 	private void addPrefCat(String cat) {
-		if(preferredCategory.contains(cat)) {
+		if(!preferredCategory.contains(cat)) {
 			preferredCategory.add(cat);
 			System.out.println(cat + " was added to your preferred categories.");
 		}
