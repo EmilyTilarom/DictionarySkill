@@ -1,15 +1,20 @@
 package DicSkill;
 
-import java.util.ArrayList;
-import java.util.Iterator;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+
+/**
+ * 28.06.2018
+ * NEW:
+ * -	improved code documentation
+ *	@author Lia
+ */
 
 /**
  * 27.06.2018
  * NEW:
  * -	added categories, which do not work with the database, but may improve the output
- * 		they are changable.
+ * 		they are changeable.
  *	@author Lia
  */
 
@@ -77,9 +82,9 @@ import java.util.regex.Pattern;
  */
 
 /**
- * MessageManager is the first class to receive the users query.
- * It then proceeds to prepare the message, searches for the wished word and the appropriate functions.
- * When an answer is returned from the DatabaseCommunicator, MessageManager creates a humanly understandable answer.
+ * MessageManager is the first class to receive the users input.
+ * It then proceeds to prepare the message, searches for the wished word and the function.
+ * When an answer is returned from the DatabaseCommunicator, MessageManager returns a humanly understandable answer.
  */
 public class MessageManager {
 	
@@ -153,7 +158,7 @@ public class MessageManager {
 		wishedWord = findWishedWord(msg, context);
 		wishedWord = checkWishedWord(wishedWord, context, function); // checks if "this, it, that" is probably to mean the last ww and changed it if so
 
-		if(function == null) // if function wasnt found, try if last one could fit the input
+		if(function == null)
 			return "Sorry, I don't know which function you are asking for.";
 
 		do {
@@ -363,7 +368,7 @@ public class MessageManager {
 		}
 		
 		// SETTINGS
-		if(msg.matches(regexExpressionSettings)) { // new msg
+		if(msg.matches(regexExpressionSettings)) {
 			return Function.SETTING;
 		}
 		if(msg.matches(".*(?:to )?([1-9]+).*") // settings follow up answer, number was missing
@@ -384,11 +389,7 @@ public class MessageManager {
 	}
 
 	/**
-	 * Finds and returns the wished word in the message. Everything after the function keyword will be the wished word
-     * until further change in shortenWishedWord(). Example output: (define) "apple juice please".
-	 *
-	 * If the msg contains such a word, a substring will be created which starts at the
-	 * msg.lastIndexOf the found word + the length of the word + 1
+	 * Finds and returns the wished word in the message using regex. 
 	 *
 	 * If there is no (new) wished word the last used wished word will be used.
 	 * In this case Context will be called.
@@ -505,7 +506,7 @@ public class MessageManager {
 	private String checkWishedWord(String ww, Context context, Function f) {
 		/*
 		 * These words may be a follow up question:
-		 * that, it
+		 * that, it, this
 		 */
 		if(ww == null || f == null) {
 			return null;
@@ -595,7 +596,7 @@ public class MessageManager {
 			case SETTING:
 				return "";
 			
-			// may have to be adjusted for added functions
+			// Must be adjusted if functions are added
 			case WHATCANYOUDO:
 				return "The dictionary skill can give translations, definitions, synonyms, spellings, "
 						+ "example sentences, change the number of words for your results and give you more results for your last request.";
@@ -642,9 +643,8 @@ public class MessageManager {
 	}
 
 	/**
-	 * If the wished word consists of multiple words ( e.g: apple juice please.),
-     * decodeMessage starts multiple queries. This function shortens the wished word, one word at a time.
-     * Thus an adequate match can be found.
+	 * If the wished word consists of multiple words ( e.g: apple juice please.), this function shortens 
+	 * the wished word, one word at a time until a match for the ww could be found.
 	 *
 	 * If the ww is empty, null will be returned. If shortenPosTo is too small, null will be returned too.
 	 *

@@ -25,6 +25,13 @@ import org.apache.lucene.store.Directory;
 import org.apache.lucene.store.FSDirectory;
 
 /**
+ * 28.06.2018
+ * NEW:
+ * -	improved code documentation
+ *	@author Lia
+ */
+
+/**
  * 23.06.2018
  * NEW:
  * -	Improved results for translations
@@ -66,16 +73,20 @@ import org.apache.lucene.store.FSDirectory;
  * @author Lia
  */
 
+/**
+ * Lucene provides translations and synonyms by performing full text search.
+ */
 public class Lucene {
 	
 	/** VARIABLES **/
-	Directory directory;
-	Analyzer analyzer;
+	private Directory directory;
+	private Analyzer analyzer;
 	
-	ArrayList<String> leftoverResults = new ArrayList<String>();
+	private ArrayList<String> leftoverResults;
 	
 	/** CONSTRUCTOR **/
 	public Lucene() {
+		leftoverResults = new ArrayList<String>();
 		
 		// Creates index in specifies directory
 		try {
@@ -112,7 +123,15 @@ public class Lucene {
 		}
 	}
 	
-	/** Methods **/
+	/** METHODS **/
+	
+	/**
+	 * This function returns translations for the wished word by performing a full text search and then filtering
+	 * the results manually.
+	 * @param ww wished word
+	 * @param nOW numberOfWords
+	 * @return translations for the wished word
+	 */
 	public String[] translate(String ww, int nOW) {
 
 		try {
@@ -121,7 +140,7 @@ public class Lucene {
 				return null;
 			}
 
-			// returns result without additional characters and sorted
+			// returns nOW result without additional characters and sorted or null
 			return getResults(results, nOW, ww);
 			
 		} catch (IOException e) {
@@ -133,169 +152,12 @@ public class Lucene {
 		return null;
 	}
 
-
-    /**
-     * Returns perfect matches word by word in Array, returns null if no perfect is found
-     * adds not perfect but fitting results to leftover results
-	 *
-     * @param results ArrayList of fount entries containing the ww
-     * @param ww WishedWord
-     * @param numberOfWishedResults number of wished results
-     * @return returns array of results or null if no perfect match was found
-     */
-    private ArrayList<String> getMatches(ArrayList<String> results, String ww, int numberOfWishedResults)
-    {
-    	leftoverResults.clear(); // needs to be cleared before any new results are gathered
-    	
-    	/*	NOTE: 
-    	 * 	to get a matching result, each result needs to be divided at the | character. The position of the match
-         *  will have the same position in the english version and everything else can therefore be removed.
-         *  Afterwards there will be a matching result, which may contain synonyms divided by the ; character
-         *  Example:
-         *  english line: "exact | exactly; precisely" -> [0]:"exact " [1]:" exactly; precisely"
-         *  german line: "pr�zise; genau | genau" -> [0]:"pr�zise; genau " [1]:" genau"
-         *  german line [n] and english line [n] contain matching results. All results divided by ; in [n] 
-         *  are perfect results. Everything else are alternative results, which may not be perfect. This makes
-         *  "pr�zise" and "genau" perfect results when asking for a translation for "exact".
-         */
-    	
-    	ArrayList<String> resultArrayList = new ArrayList<String>();
-    	int j = 1; // just a counter for the loop, starting at the first English content
-    	while(j<results.size()) // only every 2nd, so it only checks English results
-        {
-    		String[] englishLine = results.get(j).split(" \\|");
-    		String[] germanLine = results.get(j-1).split(" \\|");
-    		
-    		//this should never happen and would mean the content of the database is faulty
-    		if(englishLine.length != germanLine.length) {
-    			System.out.println("Sorry, our database let you down on this.");
-    		}
-    		
-    		//adds the German equivalent for the found String to matches
-    		for(int i=0; i < englishLine.length; i++) {
-    			englishLine[i] = removeInvalidChars(englishLine[i]); // removes invalid chars for better comparisons
-    			
-    			/*
-    			 * Perfect matches:
-    			 * -	equals ww 				(ww |) 		BUT NOT e.g.: "dog food; food for dog"
-    			 * -	start with ww+";" 		(ww; othermatches ... |)
-    			 * -	end with "; "+ww		( othermatches ... ; ww |)
-    			 * -	contain "; "+ww+";"		( othermatches; ww; othermatches |)
-    			 * Other matches only contain the ww anywhere in the string, e.g. as second word
-    			 */
-    			if(englishLine[i].contains(ww)) {
-	    			
-    				// results are split at ; as they divide synonyms
-	    			String[] translations = germanLine[i].split(";");
-	 
-	    			// adds found translation depending on: imperect match or perfect match
-	    			for(int x=0; x<translations.length; x++) {
-	    				
-	    				// perfect matches
-	    				if(		englishLine[i].equals(ww)
-	    						|| englishLine[i].endsWith("; "+ww) 
-	    						|| englishLine[i].startsWith(ww+";")
-	    						|| englishLine[i].contains("; "+ww+";") ) { // adds perfect matches to resultArrayList
-	    					
-	    					//System.out.println("perfect: "+englishLine[i] + " = "+ translations[x]); // for testing
-	    					
-	    					resultArrayList.add(removeInvalidChars(translations[x]));
-	    				}
-	    				else { // imperfect matches
-	    					// System.out.println("imperfect: "+englishLine[i] + " = "+ translations[x]);// for testing
-	    					if(leftoverResults.size() == 0) {
-	    						leftoverResults.add(". Other results you may like are "+ removeInvalidChars(translations[x]) );
-	    					}
-	    					else {
-	    						leftoverResults.add(removeInvalidChars(translations[x])); // adds leftover matches to leftoverResults
-	    					}
-	    					
-	    				}
-	    			
-	    				//System.out.println(translations[x]); // prints added line (for testing)
-	    			}
-	    		}
-    		}
-    		j +=2;
-        }
-    	
-    	return resultArrayList;
-    	
-    }
-
-    /**
-     * removes all characters after an invalid char such as { and converts from ArrayList to Array on the way
-     * @param phrases: Phrases in ArrayList<String> which may contain invalid chars
-     * @return phrases as Array, characters after an invalid character excluded
-     */
-	private String[] removeInvalidChars(ArrayList<String> phrases) {
-		
-		String[] result = new String[phrases.size()];
-        
-        for(int i=0; i<phrases.size(); i++){
-            
-            result[i] = removeInvalidChars(phrases.get(i));
-        }
-        
-        return result;
-	}
-	
-	/**
-     * removes all characters after an invalid char such as { and converts from the String
-     * @param phrase: String, which may contain invalid chars
-     * @return phrase as String, characters after an invalid character excluded
-     */
-	private String removeInvalidChars(String phrase) {
-		
-		String[] invalidChars = {"{", "[", "("};
-		String[] charCounterpart = {"}", "]", ")"};
-		
-		// for each invalid char and counterpart
-        for(int i=0; i<invalidChars.length; i++ ) {
-	        if(phrase.contains(invalidChars[i]) && phrase.contains(charCounterpart[i]) ) { 
-	        	// removes everything between invalid character and its counterpart
-	        	phrase = phrase.replaceAll("\\"+invalidChars[i]+".*\\"+charCounterpart[i], "");
-	        }
-		}
-        
-        //removes whitespace(s) at start or end of phrase
-        phrase = phrase.trim();
-        return phrase;
-	}
-    
-	/**
-	 * Returns nOW more results for last search carried out with lucene. These results were previously saved in
-	 * leftoverResults. If leftoverResult.size() < nOW, it will only return leftoverResult.size() results
-	 * @param nOW: number of words requested from lucene
-	 * @return result: results from lucene
-	 */
-	public String[] getMoreResults(int nOW) {
-		
-		ArrayList<String> endResult = new ArrayList<String>();
-		
-		// returns null in case there are no more results.
-		if(leftoverResults.isEmpty()) {
-			return null;
-		}
-		
-		// adds nOW results from leftoverResults (but max. leftoverResults.size() ) to endResult
-		int i=0;
-		while(i<nOW && !leftoverResults.isEmpty()) {
-    		endResult.add( leftoverResults.get( 0 ) );
-    		leftoverResults.remove( 0 );
-    		i++;
-    	}
-
-		return removeInvalidChars(endResult);
-		
-	}
-    
 	/**
      * Creates an end results from perfect matches (perfectResults) and imperfect matches (leftoverResults).
-     * The end results will only contain as many results as were requested (not all)
-     * @param results: ArrayList of all entries found in the dictionary containing the ww
-     * @param nOW: number of words, tells the functions how many words are wished
-     * @param ww: wished word we are looking for in the data base
+     * The end results will only contain as many results as were requested.
+     * @param results is an ArrayList of all entries found in the dictionary containing the ww
+     * @param nOW number of words, tells the functions how many results are requested
+     * @param ww wished word
      * @return returns Array of results or null if no results were found
      */
 	private String[] getResults(ArrayList<String> results, int nOW, String ww) {
@@ -341,98 +203,126 @@ public class Lucene {
         // returns perfect results (perfectResults.size() is equal to nOW )
         return removeInvalidChars(perfectResults);
 	}
-
-    /**
-     * creates index of the dictionary file
-     * @throws IOException
-     * @throws ParseException
-     */
-	private void createIndex() throws IOException, ParseException {
-		analyzer = new StandardAnalyzer();
-		
-		//Directory directory = new RAMDirectory(); // Stores the index in memory (RAM)
-		directory = FSDirectory.open(Paths.get("./dict/German/indexDirectory")); // Stores indexes on disk
-		IndexWriterConfig config = new IndexWriterConfig(analyzer);
-		IndexWriter iwriter = new IndexWriter(directory, config);
+    
 	
-		// gets file(s) which require indexing
-		List<String> text = Files.readAllLines(Paths.get("./dict/German/filesToIndex/de-en.txt"));
-		
-		Iterator<String> textIterator = text.iterator();
-		textIterator.next(); // have to skip, because first output "?" fucks everything up
-		while(textIterator.hasNext()) {
-			String nextLine = textIterator.next();
-			
-			if(nextLine.isEmpty()) continue; // skip line in case it's empty
-			
-			String[] parts = nextLine.split("::"); // :: separates English and German
-			
-			Document doc = new Document();
-			// Two parts: English and German
-			doc.add(new Field("german", parts[0], TextField.TYPE_STORED));
-			doc.add(new Field("english", parts[1], TextField.TYPE_STORED));
-			iwriter.addDocument(doc);
-		}
-		// closes iwriter
-		iwriter.close();
-	}
-
-    /**
-     * looks for all entries containing ww in the database 
-     * @param ww wished word, which we are looking for in the database
-     * @return 	List of all entries in the database which contain the wished word.
-     * 			Odd numbers contain the German part, while even numbers contain the English part
-     * @throws IOException
-     * @throws ParseException
+	/**
+     * Returns perfect matches word by word in Array, returns null if no perfect matches are found.
+     * Adds imperfect results to leftover results. For this results are filtered manually.
+	 *
+     * @param results ArrayList of found entries containing the ww
+     * @param ww WishedWord
+     * @param numberOfWishedResults number of wished results
+     * @return returns array of results or null if no perfect match was found
      */
-	private ArrayList<String> searchIndex(String ww) throws IOException, ParseException {
-		/* NOTE:
-		 * this returns all hits for the wished word including results which are irrelevant for the
-		 * search term. For example "exact" will also return results for "exactly", "cat" will return results
-		 * such as "cat flap" and "domestic cat" too. And "cat flap" will return all results containing "cat"
-		 * OR "flap" (separate search).
-		 * This means, the results must be filtered manually.
-		 */
+    private ArrayList<String> getMatches(ArrayList<String> results, String ww, int numberOfWishedResults)
+    {
+    	leftoverResults.clear(); // needs to be cleared before any new results are gathered!
+    	
+    	/*	NOTE: 
+    	 * 	to get a matching result, each result needs to be divided at the | character. The position of the match
+         *  will have the same position in the english version and everything else can therefore be removed.
+         *  Afterwards there will be a matching result, which may contain synonyms divided by the ; character
+         *  Example:
+         *  english line: "exact | exactly; precisely" -> [0]:"exact " [1]:" exactly; precisely"
+         *  german line: "praezise; genau | genau" -> [0]:"praezise; genau " [1]:" genau"
+         *  german line [n] and english line [n] contain matching results. All results divided by ; in [n] 
+         *  are perfect results. Everything else are alternative results, which may not be perfect. This makes
+         *  "praezise" and "genau" perfect results when asking for a translation for "exact".
+         *  
+         *  This means perfect matches are recognizes as follows:
+         *  	* Perfect matches:
+    			 * -	equals ww 				(ww |) 		BUT NOT e.g.: "dog food; food for dog" for ww="dog"
+    			 * -	start with ww+";" 		(ww; othermatches ... |)
+    			 * -	end with "; "+ww		( othermatches ... ; ww |)
+    			 * -	contain "; "+ww+";"		( othermatches; ww; othermatches |)
+    			 * Other matches only contain the ww anywhere in the string, e.g. as second word
+         */
+    	
+    	ArrayList<String> resultArrayList = new ArrayList<String>();
+    	int j = 1; // just a counter for the loop, starting at the first English content
+    	while(j<results.size()) // only every 2nd, so it only checks English results
+        {
+    		String[] englishLine = results.get(j).split(" \\|");
+    		String[] germanLine = results.get(j-1).split(" \\|");
+    		
+    		//this should never happen and would mean the content of the database is faulty
+    		if(englishLine.length != germanLine.length) {
+    			System.out.println("Sorry, our database let you down on this.");
+    		}
+    		
+    		//adds the German equivalent for the found String to matches
+    		for(int i=0; i < englishLine.length; i++) {
+    			englishLine[i] = removeInvalidChars(englishLine[i]); // removes invalid chars for better comparisons
+    			
+    			if(englishLine[i].contains(ww)) {
+	    			
+    				// results are split at ; as they divide synonyms
+	    			String[] translations = germanLine[i].split(";");
+	 
+	    			// adds found translation: imperect matches->leftover Results and perfect matches->results
+	    			for(int x=0; x<translations.length; x++) {
+	    				
+	    				// perfect matches
+	    				if(		englishLine[i].equals(ww)
+	    						|| englishLine[i].endsWith("; "+ww) 
+	    						|| englishLine[i].startsWith(ww+";")
+	    						|| englishLine[i].contains("; "+ww+";") ) {
+	    					
+	    					//System.out.println("perfect: "+englishLine[i] + " = "+ translations[x]); // for testing
+	    					
+	    					resultArrayList.add(removeInvalidChars(translations[x]));
+	    				}
+	    				
+	    				// imperfect matches
+	    				else {
+	    					// System.out.println("imperfect: "+englishLine[i] + " = "+ translations[x]);// for testing
+	    					if(leftoverResults.size() == 0) {
+	    						leftoverResults.add(". Other results you may like are "+ removeInvalidChars(translations[x]) );
+	    					}
+	    					else {
+	    						leftoverResults.add(removeInvalidChars(translations[x]));
+	    					}
+	    					
+	    				}
+	    			
+	    				//System.out.println(translations[x]); // prints added line (for testing)
+	    			}
+	    		}
+    		}
+    		j +=2;
+        }
+    	
+    	return resultArrayList;
+    	
+    }
+
+	/**
+	 * Returns more results for last search carried out with lucene. These results were previously saved in
+	 * leftoverResults. If leftoverResult.size() < nOW, it will only return leftoverResult.size() results
+	 * @param nOW: number of words requested from lucene
+	 * @return result: results from lucene
+	 */
+	public String[] getMoreResults(int nOW) {
 		
-		ArrayList<String> results = new ArrayList<String>();
-		analyzer = new StandardAnalyzer();
-		directory = FSDirectory.open(Paths.get("./dict/German/indexDirectory"));
+		ArrayList<String> endResult = new ArrayList<String>();
 		
-		String searchWord = ww;
-		if(ww == null) {
+		// returns null in case there are no more results.
+		if(leftoverResults.isEmpty()) {
 			return null;
 		}
 		
-		// Search the index:
-		DirectoryReader ireader = DirectoryReader.open(directory);
-		IndexSearcher isearcher = new IndexSearcher(ireader);
-				
-		// Parse a simple query that searches for the searchWord:
-		QueryParser parser = new QueryParser("english", analyzer);
-		Query query = parser.parse( searchWord );
-		ScoreDoc[] hits = isearcher.search(query, 1000).scoreDocs;
-				
-		// Iterate through the results:
-		for (int i = 0; i < hits.length; i++) {
-			Document hitDoc = isearcher.doc(hits[i].doc);
-			Iterator<IndexableField> it = hitDoc.iterator();
-					
-			while(it.hasNext()) {
-				IndexableField f = it.next();
-				String result = f.stringValue();
-				results.add( result );
-				//System.out.println(f.name() + " " + i + " = " + result); // for testing, prints all results
-			}
-		}
+		// adds nOW results from leftoverResults (but max. leftoverResults.size() ) to endResult
+		int i=0;
+		while(i<nOW && !leftoverResults.isEmpty()) {
+    		endResult.add( leftoverResults.get( 0 ) );
+    		leftoverResults.remove( 0 );
+    		i++;
+    	}
+
+		return removeInvalidChars(endResult);
 		
-		// Close ireader and directory
-		ireader.close();
-		directory.close();
-		
-		// returns Array containing results
-		return results;
 	}
-	
+    
 	 /**
      * return synonyms for the ww found in the de-en database
      * @param ww: WishedWord
@@ -441,6 +331,7 @@ public class Lucene {
      */
 	public String[] getSynonyms(String ww) {
 		leftoverResults.clear(); // needs to be cleared before any new results are gathered
+		
 		ArrayList<String> results = new ArrayList<String>();
 		try {
 			results = searchIndex(ww); // gets results from database
@@ -501,6 +392,136 @@ public class Lucene {
 		
 	}
 	
+	/**
+     * creates indexes for the de-en.txt file (database for German translations)
+     * @throws IOException
+     * @throws ParseException
+     */
+	private void createIndex() throws IOException, ParseException {
+		analyzer = new StandardAnalyzer();
+		
+		//Directory directory = new RAMDirectory(); // Stores the index in memory (RAM)
+		directory = FSDirectory.open(Paths.get("./dict/German/indexDirectory")); // Stores indexes on disk
+		IndexWriterConfig config = new IndexWriterConfig(analyzer);
+		IndexWriter iwriter = new IndexWriter(directory, config);
+	
+		// gets file(s) which require indexing
+		List<String> text = Files.readAllLines(Paths.get("./dict/German/filesToIndex/de-en.txt"));
+		
+		Iterator<String> textIterator = text.iterator();
+		textIterator.next(); // have to skip, because first output "?" fucks everything up
+		while(textIterator.hasNext()) {
+			String nextLine = textIterator.next();
+			
+			if(nextLine.isEmpty()) continue; // skip line in case it's empty
+			
+			String[] parts = nextLine.split("::"); // :: separates English and German
+			
+			Document doc = new Document();
+			// Two parts: English and German
+			doc.add(new Field("german", parts[0], TextField.TYPE_STORED));
+			doc.add(new Field("english", parts[1], TextField.TYPE_STORED));
+			iwriter.addDocument(doc);
+		}
+		
+		iwriter.close();
+	}
+
+    /**
+     * This returns all hits for the wished word including results which are irrelevant for the
+     * search term. For example "exact" will also return results for "exactly", "cat" will return results
+     * such as "cat flap" and "domestic cat" too. And "cat flap" will return all results containing "cat"
+     * OR "flap" (separate search).
+     * This means, the results must be filtered manually before using them.
+     * @param ww wished word, which we are looking for in the database
+     * @return 	List of all entries in the database which contain the wished word.
+     * 			Odd numbers contain the German part, while even numbers contain the English part
+     * @throws IOException
+     * @throws ParseException
+     */
+	private ArrayList<String> searchIndex(String ww) throws IOException, ParseException {
+		
+		ArrayList<String> results = new ArrayList<String>();
+		analyzer = new StandardAnalyzer();
+		directory = FSDirectory.open(Paths.get("./dict/German/indexDirectory"));
+		
+		String searchWord = ww;
+		if(ww == null) {
+			return null;
+		}
+		
+		// Search the index:
+		DirectoryReader ireader = DirectoryReader.open(directory);
+		IndexSearcher isearcher = new IndexSearcher(ireader);
+				
+		// Parse a simple query that searches for the searchWord:
+		QueryParser parser = new QueryParser("english", analyzer);
+		Query query = parser.parse( searchWord );
+		ScoreDoc[] hits = isearcher.search(query, 1000).scoreDocs;
+				
+		// Iterate through the results:
+		for (int i = 0; i < hits.length; i++) {
+			Document hitDoc = isearcher.doc(hits[i].doc);
+			Iterator<IndexableField> it = hitDoc.iterator();
+					
+			while(it.hasNext()) {
+				IndexableField f = it.next();
+				String result = f.stringValue();
+				results.add( result );
+				//System.out.println(f.name() + " " + i + " = " + result); // for testing, prints all results
+			}
+		}
+		
+		// Close ireader and directory
+		ireader.close();
+		directory.close();
+		
+		// returns Array containing results
+		return results;
+	}
+	
+	 /**
+     * Removes all characters between an invalid char such as { and its counterpart }. (Also includes the invalid char itself)
+     * Converts from ArrayList to Array.
+     * @param phrases in ArrayList<String> which may contain invalid chars
+     * @return phrases as Array, invalid characters excluded
+     */
+	private String[] removeInvalidChars(ArrayList<String> phrases) {
+		
+		String[] result = new String[phrases.size()];
+        
+        for(int i=0; i<phrases.size(); i++){
+            
+            result[i] = removeInvalidChars(phrases.get(i));
+        }
+        
+        return result;
+	}
+	
+	/**
+     * Removes all characters between an invalid char such as { and its counterpart }. (Also includes the invalid char itself)
+     * @param phrase: String, which may contain invalid chars
+     * @return phrase as String, characters after an invalid character excluded
+     */
+	private String removeInvalidChars(String phrase) {
+		
+		String[] invalidChars = {"{", "[", "("};
+		String[] charCounterpart = {"}", "]", ")"};
+		
+		// for each invalid char and counterpart
+        for(int i=0; i<invalidChars.length; i++ ) {
+	        if(phrase.contains(invalidChars[i]) && phrase.contains(charCounterpart[i]) ) { 
+	        	// removes everything between invalid character and its counterpart
+	        	phrase = phrase.replaceAll("\\"+invalidChars[i]+".*\\"+charCounterpart[i], "");
+	        }
+		}
+        
+        phrase = phrase.trim(); //removes whitespace(s) at start or end of phrase
+        
+        return phrase;
+	}
+	
+	/** SETTERS AND GETTERS **/
 	public String[] getLeftoverResults() {
 		return removeInvalidChars(leftoverResults);
 	}

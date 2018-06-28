@@ -5,6 +5,13 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 /**
+ * 28.06.2018
+ * NEW:
+ * -	improved code documentation
+ *	@author Lia
+ */
+
+/**
  * 25.06.2018
  * NEW:
  * -	Settings now uses Regex instead of searching for keywords
@@ -20,7 +27,6 @@ import java.util.regex.Pattern;
  * -	Function Example added
  * -	Bug fixes
  * @author Walter
- *
  */
 
 /**
@@ -28,7 +34,6 @@ import java.util.regex.Pattern;
  * NEW:
  * -	Settings is now savable
  * @author Lia
- *
  */
 
 /**
@@ -37,9 +42,7 @@ import java.util.regex.Pattern;
  * -	make settings saveable
  * NEW:
  * -	setNOW function
- * 
  * @author Lia
- *
  */
 
 /**
@@ -47,12 +50,11 @@ import java.util.regex.Pattern;
  * TO DO:
  * -	make settings saveable
  * @author Lia
- *
  */
 
 /**
  * This class enabled the user to modify the answers. He can change the NOW (Number of words)
- * to get a specific number of results for each function. 
+ * to get a specific number of results for translations, definitions, synonyms, examples, scrabble functions.
  */
 public class Settings implements Serializable  
 {
@@ -67,8 +69,9 @@ public class Settings implements Serializable
 	private int NOW_scrabble;
 	private int lastFailedNumberChange; // remembers the number after a failed change
 	private String lastFailedFunctionChange; // remembers the function after a failed change
+	private String regexExpressionSettings;
 	
-	/** Constructor **/
+	/** CONSTRUCTOR **/
 	public Settings()  {
 
 		this.NOW_translation = 1;
@@ -79,8 +82,19 @@ public class Settings implements Serializable
 		
 		lastFailedFunctionChange = null;
 		lastFailedNumberChange = -1;
-		String regexExpressionSettings = ".*\\b(set|change|put)\\b (the )?\\b(number|amount)\\b of \\b(words|results)\\b for "
-				+ "\\b(definition|translation|synonym|example|scrabble function)s?\\b to ([1-9])([0-9]*).*";
+		
+		/*
+		 * regex explained for those new to regex:
+		 * ".*\\b(set|change|put)\\b (the )?\\b(number|amount)\\b of \\b(words|results)\\b for \\b(definition|translation|synonym|example|scrabble function)s?\\b to ([1-9])([0-9]*).*
+		 * .* means any number of any characters ma be here
+		 * \\b(set|change|put)\\b one of the options must follow, but as seperate word ("pset" would not match for ".*\\b(set|change|put)\\b")
+		 * ? means whatever is before ? is optional
+		 * then to must follow
+		 * ([1-9])([0-9]*) means any number between 1 and 9 must follow. Then any number between 0 and 9 can follow any amount of times.
+		 * .* means the string may end with any character, any amount of times
+		 */
+		regexExpressionSettings = ".*\\b(set|change|put)\\b (the )?\\b(number|amount)\\b of \\b(words|results)\\b for "
+				+ "\\b(definition|translation|synonym|example|scrabble function|all|all functions)s?\\b to ([1-9])([0-9]*).*";
 	}
 	
 	/** Methods **/
@@ -112,8 +126,7 @@ public class Settings implements Serializable
 		Matcher matcher;
 		
 		// all info was provided
-		pattern = Pattern.compile(".*\\b(set|change|put)\\b (the )?\\b(number|amount)\\b of \\b(words|results)\\b for "
-				+ "\\b(definition|translation|synonym|example|scrabble function|all|all functions)s?\\b to ([1-9])([0-9]*).*");
+		pattern = Pattern.compile(regexExpressionSettings);
 		matcher = pattern.matcher(msg);
 		if (matcher.matches()) // checks if all info was provided
 		{
@@ -173,9 +186,14 @@ public class Settings implements Serializable
 		
 	}
 	
-	
+	/**
+	 * changes settings depending on which function was found and prints msg.
+	 * 
+	 * @param function is the functions settings will be changed for
+	 * @param nOW is the number the number of words for that function will be changed to
+	 */
 	public void setForFunction(String function, int nOW) {
-		//changes settings depending on which function was found and prints msg.
+		
 		if(function.contains("translation")) {
 			NOW_translation = nOW;
 			System.out.println("Number of words for translations have been set to "+nOW);
@@ -206,6 +224,11 @@ public class Settings implements Serializable
 		lastFailedFunctionChange = null;
 	}
 	
+	/**
+	 * returns the current number of words for the function given
+	 * @param f is the function
+	 * @return the now for f
+	 */
 	public int getNOW(Function f) {
 		
 		this.NOW_translation = 1;
@@ -233,7 +256,7 @@ public class Settings implements Serializable
 		}
 	}
 	
-	/** Setters and Getters **/
+	/** SETTERS AND GETTERS **/
 	public int getNOW_translation() {
 		return NOW_translation;
 	}
