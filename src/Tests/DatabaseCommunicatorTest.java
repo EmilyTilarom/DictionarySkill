@@ -21,6 +21,7 @@
 
 package Tests;
 
+import DicSkill.Context;
 import DicSkill.DatabaseCommunicator;
 import org.junit.After;
 import org.junit.Assert;
@@ -64,21 +65,21 @@ public class DatabaseCommunicatorTest {
     public void testDefineForWishedWordsThatMakeSense() {
 
         wishedWordsThatMakeSense = new String[] {"success", "running", "certain", "apple juice"};
-
+        Context context = new Context();
         String[] result;
 
         for (String ww: wishedWordsThatMakeSense) {
 
-            result = dc.define(ww, -1);
+            result = dc.define(ww, -1, context);
             Assert.assertNull(result);
 
-            result = dc.define(ww, 0);
+            result = dc.define(ww, 0, context);
             Assert.assertNull(result);
 
-            result = dc.define(ww, 1);
+            result = dc.define(ww, 1, context);
             Assert.assertNotNull(result[0]);
 
-            result = dc.define(ww, 100);
+            result = dc.define(ww, 100, context);
             Assert.assertNotNull(result[0]);
         }
 
@@ -88,21 +89,21 @@ public class DatabaseCommunicatorTest {
     public void testDefineForWishedWordsThatDoNotMakeSense() {
 
         wishedWordsThatMakeNOSense = new String[] {"apple juice please", "thisWordDoesNotExist", "!?", "-.", "420", " ", "" };
-
+        Context context = new Context();
         String[] result;
 
         for (String ww: wishedWordsThatMakeNOSense) {
 
-            result = dc.define(ww, -1);
+            result = dc.define(ww, -1, context);
             Assert.assertNull(result);
 
-            result = dc.define(ww, 0);
+            result = dc.define(ww, 0, context);
             Assert.assertNull(result);
 
-            result = dc.define(ww, 1);
+            result = dc.define(ww, 1, context);
             Assert.assertNull(result);
 
-            result = dc.define(ww, 100);
+            result = dc.define(ww, 100, context);
             Assert.assertNull(result);
         }
 

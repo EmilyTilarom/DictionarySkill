@@ -6,6 +6,14 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 /**
+ * 27.06.2018
+ * NEW:
+ * -	added categories, which do not work with the database, but may improve the output
+ * 		they are changable.
+ *	@author Lia
+ */
+
+/**
  * 26.06.2018
  * NEW:
  * -	swapped keywords with regex 
@@ -85,10 +93,8 @@ public class MessageManager {
 	String regexExpressionSettings; 
 	String regexExpressionHelper;
 	String regexExpressionMore;
+	String regexExpressionCategory;
 	
-	//private ArrayList<String> keywords_setting;
-	private ArrayList<String> keywords_whatCanYouDo;
-	private ArrayList<String> keywords_changePrefCat;
 
 	/** Constructor **/
 	public MessageManager() {
@@ -111,9 +117,7 @@ public class MessageManager {
 		regexExpressionMore = ".*more.*";
 		
 		// CHANGE PREFERRED CATEGORIES
-		keywords_changePrefCat = new ArrayList<String>();
-		keywords_changePrefCat.add("preferred category");
-		keywords_changePrefCat.add("preferred categories");
+		regexExpressionCategory = "^.*([ a-zA-Z]*)( to| from)?( my | the )?(preferred category|preferred categories).*$";
 	}
 
 	/** Methods **/
@@ -159,7 +163,7 @@ public class MessageManager {
 					result = dbC.translate(wishedWord, settings.getNOW_translation());
 					break;
 				case DEFINITION:
-					result = dbC.define(wishedWord, settings.getNOW_definition());
+					result = dbC.define(wishedWord, settings.getNOW_definition(), context);
 					state.save(settings, context);
 					break;
 				case SPELLING:
@@ -348,6 +352,10 @@ public class MessageManager {
 			}
 		}
 		
+		// change preferred category
+		if(msg.matches(regexExpressionCategory)) {
+			return Function.CHANGE_PREF_CAT;
+		}
 		
 		// helper function
 		if(msg.matches(regexExpressionHelper)) {
@@ -592,6 +600,9 @@ public class MessageManager {
 				return "The dictionary skill can give translations, definitions, synonyms, spellings, "
 						+ "example sentences, change the number of words for your results and give you more results for your last request.";
 			
+			case CHANGE_PREF_CAT:
+				return "";
+				
 			case MORE:
 				if(result != null) {
 					return result;

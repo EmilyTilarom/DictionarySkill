@@ -2,6 +2,15 @@ package DicSkill;
 
 import java.io.Serializable;
 import java.util.ArrayList;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+
+/**
+ * 27.06.2018
+ * NEW:
+ * -	changed how changing pref categories works.
+ *	@author Lia
+ */
 
 /**
  * 10.06.2018
@@ -69,32 +78,32 @@ public class Context implements Serializable {
 	 */
 	public void changePrefCat(String msg) {
 		
-		if(msg.contains("add")) {
-			String cat = msg.substring( msg.indexOf("add")+4 );
-			if( cat.contains(" ") )
-				cat = cat.substring(0, cat.indexOf(" "));
-			addPrefCat( cat );
-		}
+		Pattern pattern = Pattern.compile("^.*(add|remove|delete all)([ a-zA-Z][a-zA-Z]*)( to | from )?(my |the )?(preferred category|preferred categories).*$");
+		Matcher matcher = pattern.matcher(msg);
 		
-		else if(msg.contains("remove")) {
-			String cat = msg.substring( msg.indexOf("remove")+7);
-			if( cat.contains(" "))
-				cat = cat.substring(0, cat.indexOf(" "));
-			removePrefCat( cat );
+		if(matcher.matches()) {
+			
+			if(matcher.group(1).matches("add")) {
+				String cat = matcher.group(2);
+				addPrefCat( cat.trim() );
+			}
+			
+			else if(matcher.group(1).matches("remove")) {
+				String cat = matcher.group(2);
+				removePrefCat( cat.trim() );
+			}
+			
+			else if(matcher.group(1).matches("delete all")) {
+				deleteAllPrefCat();
+			}	
 		}
-		
-		else if (msg.contains("delete all")) {
-			String cat = msg.substring( msg.indexOf("delete all")+11);
-			if( cat.contains(" "))
-				cat = cat.substring(0, cat.indexOf(" "));
-			deleteAllPrefCat();
-		}
-		
 		else {
 			System.out.println("Sorry, I could not understand which changes you want to "
 					+ "make to your preferred categories. You may add a category, remove a "
 					+ "category or delete all preferred categories.");
 		}
+		
+	
 		
 	}
 

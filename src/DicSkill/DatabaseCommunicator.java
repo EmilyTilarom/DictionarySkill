@@ -8,6 +8,8 @@ import rita.RiWordNet;
  * 27.06.2018
  * NEW:
  * - 	improved ritas output for the scrabbe function (e.g. only returns results without special characters)
+ * -	added categories, which do not work with the database, but may improve the output
+ * 		they are changable.
  * @author Lia
  */
 /**
@@ -181,7 +183,7 @@ public class DatabaseCommunicator {
 	 * @param NOW numberOfWords
 	 * @return String[] databaseOutput[]
 	 */
-	public String[] define(String ww, int NOW) {
+	public String[] define(String ww, int NOW, Context context) {
 
 		if (!ritaDB.exists(ww)) {
 			return null;
@@ -194,6 +196,8 @@ public class DatabaseCommunicator {
 			result = ritaDB.getAllGlosses(ww, pos);
 		}
 		catch(Exception e) {}
+		
+		result = sortByPrefCategoryFirst(context, result);
 		
 		result = extractArray(result, NOW);
 		
@@ -433,5 +437,42 @@ public class DatabaseCommunicator {
 		}
 
 		return returnArray;
+	}
+	
+	/**
+	 * This function is called, when the context is used.
+	 * For example if the user wants to get more results to the last synonym.
+	 *
+	 * @param conext to get the preferred categories
+	 * @param results, which contains the results received by the database
+	 * @return results sorted by preferred category first
+	 */
+	private String[] sortByPrefCategoryFirst(Context context, String[] results) {
+		if(results == null || context.getPreferredCategory() == null || context.getPreferredCategory().isEmpty()) {
+			return null;
+		}
+		
+		String[] prefResultsFirst = new String[results.length];
+		int prefResultsCounter = 0;
+		
+		for(String category : context.getPreferredCategory() ) {
+			
+			for(int i=0; i<results.length; i++) {
+				if(results[i].matches(".*"+category+".*")) {
+					prefResultsFirst[prefResultsCounter++] = results[i];
+					results[i] = "";
+					
+				}
+			}
+			
+		}
+		
+		for(int i=0; i<results.length; i++) {
+			if(!results[i].equals("")) {
+				prefResultsFirst[prefResultsCounter++] = results[i];
+			}
+		}
+		
+		return prefResultsFirst;
 	}
 }
