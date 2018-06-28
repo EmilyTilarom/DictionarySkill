@@ -110,13 +110,11 @@ public class Lucene {
 		} catch (ParseException e) {
 			e.printStackTrace();
 		}
-
-		
 	}
 	
 	/** Methods **/
 	public String[] translate(String ww, int nOW) {
-		
+
 		try {
 			ArrayList<String> results = searchIndex(ww);
 			if(results == null) {
@@ -137,7 +135,7 @@ public class Lucene {
 
 
     /**
-     * returns perfect matches word by word in Array, returns null if no perfect is found
+     * Returns perfect matches word by word in Array, returns null if no perfect is found
      * adds not perfect but fitting results to leftover results
 	 *
      * @param results ArrayList of fount entries containing the ww
@@ -155,10 +153,10 @@ public class Lucene {
          *  Afterwards there will be a matching result, which may contain synonyms divided by the ; character
          *  Example:
          *  english line: "exact | exactly; precisely" -> [0]:"exact " [1]:" exactly; precisely"
-         *  german line: "präzise; genau | genau" -> [0]:"präzise; genau " [1]:" genau"
+         *  german line: "prï¿½zise; genau | genau" -> [0]:"prï¿½zise; genau " [1]:" genau"
          *  german line [n] and english line [n] contain matching results. All results divided by ; in [n] 
          *  are perfect results. Everything else are alternative results, which may not be perfect. This makes
-         *  "präzise" and "genau" perfect results when asking for a translation for "exact".
+         *  "prï¿½zise" and "genau" perfect results when asking for a translation for "exact".
          */
     	
     	ArrayList<String> resultArrayList = new ArrayList<String>();

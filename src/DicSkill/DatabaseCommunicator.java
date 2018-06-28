@@ -70,8 +70,6 @@ import rita.RiWordNet;
  *
  */
 
-
-
 /**
  * DatabaseCommunicator gets function specific calls. The databases will be searched accordingly
  * and the result will be extracted. Then the answer will be returned to the MessageManager.
@@ -158,9 +156,9 @@ public class DatabaseCommunicator {
 	}
 
 	/**
-	 * ---WIP--- Translate provides the translation to the wished word
+	 * Translate provides the translation to the wished word.
 	 *
-	 * @param ww  wishedWor
+	 * @param ww  wishedWord
 	 * @param NOW numberOfWords
 	 * @return String[] databaseOutput[]
 	 */
@@ -207,6 +205,9 @@ public class DatabaseCommunicator {
 	 * GiveSynonyms provides a synonym of the wished word.
 	 * (WordNet does not seem to have a lot of synonyms).
 	 *
+	 * WordNet only provides a limited amount of synonyms. If the output can be improved,
+	 * Lucene will help accordingly and the results wil be combined.
+	 *
 	 * @param ww  wishedWord
 	 * @param NOW numberOfWords
 	 * @return String[] databaseOutput[]
@@ -217,7 +218,7 @@ public class DatabaseCommunicator {
 		
 		String luceneResult[] = lucene.getSynonyms(ww);
 		
-		if (!ritaDB.exists(ww) && luceneResult.length==0) {
+		if (!ritaDB.exists(ww) && luceneResult == null) {
 			return null;
 		}
 		else if (!ritaDB.exists(ww)) {
@@ -291,6 +292,10 @@ public class DatabaseCommunicator {
 
 	/**
 	 * Returns words that start with [letters]
+	 * Results with
+	 *		-	special characters (e.g.: "a.e.")
+	 * 		-	a space after the sequence of letters (e.g.: "a horizon")
+	 * are removed from the ArrayList of results
 	 *
 	 * @param letters the word starts with
 	 * @param NOW     numberOfWords
@@ -299,20 +304,14 @@ public class DatabaseCommunicator {
 	public String[] scrabble_start(String letters, int NOW) {
 
 		String result[];
-		
-		// adds results from rita to arraylist, because arraylist can be searched better
+
 		pos = ritaDB.getBestPos(letters);
 		ArrayList<String> unfilteredResults = new ArrayList<String>(Arrays.asList(ritaDB.getStartsWith(letters, pos, MAX_RESULTS)));
-		
-		/*
-		 * Results with 
-		 * 		-	special characters (e.g.: "a.e.")
-		 * 		-	a space after the sequence of letters (e.g.: "a horizon")
-		 *	are removed from the ArrayList of results
-		 */
-		int counter = 0; // using this instead of for each loop because of java.util.ConcurrentModificationException
+
+		int counter = 0;
+
 		while(counter < unfilteredResults.size()) {
-			// if the result is not a sequence of letters which starts with letters, delete the result
+
 			if(!unfilteredResults.get(counter).matches("^"+letters+"[A-Za-z][ A-Za-z]*$")) {
 				unfilteredResults.remove(counter);
 			}
@@ -320,19 +319,21 @@ public class DatabaseCommunicator {
 				counter++;
 			}
 		}
-		
-		// results are copied to String[] results
+
 		result = new String[unfilteredResults.size()];
 		result = unfilteredResults.toArray(result);
-		
-		// adds leftover results to String[] leftover results and NOW results
+
 		result = extractArray(result, NOW);
 
 		return result;
 	}
 
 	/**
-	 * returns words that ends with [letters]
+	 * Returns words that ends with [letters]
+	 * Results with
+	 *		-	special characters (e.g.: "a.e.")
+	 * 		-	a space after the sequence of letters (e.g.: "a horizon")
+	 * are removed from the ArrayList of results
 	 *
 	 * @param letters the word starts with
 	 * @param NOW     numberOfWords
@@ -341,20 +342,14 @@ public class DatabaseCommunicator {
 	public String[] scrabble_end(String letters, int NOW) {
 
 		String result[];
-		
-		// adds results from rita to arraylist, because arraylist can be searched better
+
 		pos = ritaDB.getBestPos(letters);
 		ArrayList<String> unfilteredResults = new ArrayList<String>(Arrays.asList(ritaDB.getStartsWith(letters, pos, MAX_RESULTS)));
-		
-		/*
-		 * Results with 
-		 * 		-	special characters (e.g.: "a.e.")
-		 * 		-	a space before the sequence of letters (e.g.: "xyz a")
-		 *	are removed from the ArrayList of results
-		 */
-		int counter = 0; // using this instead of for each loop because of java.util.ConcurrentModificationException
+
+		int counter = 0;
+
 		while(counter < unfilteredResults.size()) {
-			// if the result is not a sequence of letters which starts with letters, delete the result
+
 			if(!unfilteredResults.get(counter).matches("^[ A-Za-z]*[A-Za-z]+"+letters+"$")) {
 				unfilteredResults.remove(counter);
 			}
@@ -362,19 +357,21 @@ public class DatabaseCommunicator {
 				counter++;
 			}
 		}
-		
-		// results are copied to String[] results
+
 		result = new String[unfilteredResults.size()];
 		result = unfilteredResults.toArray(result);
-		
-		// adds leftover results to String[] leftover results and NOW results
+
 		result = extractArray(result, NOW);
 
 		return result;
 	}
 
 	/**
-	 * returns words that contains [letters]
+	 * Returns words that contains [letters]
+	 * Results with
+	 *		-	special characters (e.g.: "a.e.")
+	 * 		-	a space after the sequence of letters (e.g.: "a horizon")
+	 * are removed from the ArrayList of results
 	 *
 	 * @param letters the word starts with
 	 * @param NOW     numberOfWords
@@ -383,20 +380,14 @@ public class DatabaseCommunicator {
 	public String[] scrabble_contain(String letters, int NOW) {
 
 		String result[];
-		
-		// adds results from rita to arraylist, because arraylist can be searched better
+
 		pos = ritaDB.getBestPos(letters);
 		ArrayList<String> unfilteredResults = new ArrayList<String>(Arrays.asList(ritaDB.getStartsWith(letters, pos, MAX_RESULTS)));
-		
-		/*
-		 * Results with (examples for letters=a)
-		 * 		-	special characters (e.g.: "a.e.")
-		 * 		-	a space before or after the sequence of letters (e.g.: "a horizon")
-		 *	are removed from the ArrayList of results
-		 */
-		int counter = 0; // using this instead of for each loop because of java.util.ConcurrentModificationException
+
+		int counter = 0;
+
 		while(counter < unfilteredResults.size()) {
-			// if the result is not a sequence of letters which starts with letters, delete the result
+
 			if(!unfilteredResults.get(counter).matches("^[A-Za-z ]*[A-Za-z]+"+letters+"[A-Za-z]+[ A-Za-z]*$")) {
 				unfilteredResults.remove(counter);
 			}
@@ -404,17 +395,22 @@ public class DatabaseCommunicator {
 				counter++;
 			}
 		}
-		
-		// results are copied to String[] results
+
 		result = new String[unfilteredResults.size()];
 		result = unfilteredResults.toArray(result);
-		
-		// adds leftover results to String[] leftover results and NOW results
+
 		result = extractArray(result, NOW);
 
 		return result;
 	}
 
+	/**
+	 * This function is called, when the context is used.
+	 * For example if the user wants to get more results to the last synonym.
+	 *
+	 * @param NOW
+	 * @return
+	 */
 	public String[] getMoreResults(int NOW) {
 		
 		if(leftoverResults == null || leftoverResults.length == 0) {
@@ -425,15 +421,13 @@ public class DatabaseCommunicator {
 
 		if(NOW < leftoverResults.length) {
 			returnArray = new String[NOW];
-			
-			// copies NOW results from leftoverResults to returnArray, then shortens leftoverResults
+
 			System.arraycopy(leftoverResults, 0, returnArray, 0, returnArray.length);
 			String[] tmpArray = new String[leftoverResults.length-NOW];
 			System.arraycopy(leftoverResults, returnArray.length, tmpArray, 0, tmpArray.length);
 			leftoverResults = tmpArray.clone();
 		}
 		else {
-			// "copies" all results from leftoverResults to returnArray and then deletes content of leftoverResults
 			returnArray = leftoverResults.clone();
 			leftoverResults = null;
 		}

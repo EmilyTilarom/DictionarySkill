@@ -13,6 +13,27 @@ public class MainTest {
 
         Result result2 = testContext();
 
+        Result result3 = testPerformance();
+
+    }
+
+    private static Result testPerformance() {
+
+        System.out.println("--- Testing Performance ---");
+
+        Result result = JUnitCore.runClasses(PerformanceTest.class);
+
+        for (Failure failure : result.getFailures()) {
+            System.out.println("    -> Failure: " + failure.toString());
+        }
+
+        if(result.getFailureCount() == 0) {
+            System.out.println("    -> All queries take no longer than " +  PerformanceTest.MAX_TIME + " seconds");
+        }
+
+        System.out.println("--- Finished testing Performance. Some queries take longer than " +  PerformanceTest.MAX_TIME + " seconds ---\n");
+
+        return result;
     }
 
     private static Result testMessageManager() {

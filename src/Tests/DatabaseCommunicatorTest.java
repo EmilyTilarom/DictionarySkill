@@ -1,4 +1,14 @@
 /**
+ * 27.06.2018
+ * NEW:
+ * -    implemented translate
+ * -    bugfixes
+ *
+ * @author Walter
+ *
+ */
+
+/**
  * 13.06.2018
  * TODO:
  * -    Implement translate test case
@@ -48,55 +58,6 @@ public class DatabaseCommunicatorTest {
         dc = null;
         wishedWordsThatMakeSense = null;
         wishedWordsThatMakeNOSense = null;
-    }
-
-
-    @Test
-    public void testTranslateForWishedWordsThatMakeSense() {
-/*
-        wishedWordsThatMakeSense = new String[] {"success", "running", "certain", "apple juice"};
-
-        String[] result;
-
-        for (String ww: wishedWordsThatMakeSense) {
-
-            result = dc.translate(ww, -1);
-            Assert.assertNull(result);
-
-            result = dc.translate(ww, 0);
-            Assert.assertNull(result);
-
-            result = dc.translate(ww, 1);
-            Assert.assertNotNull(result[0]);
-
-            result = dc.translate(ww, 100);
-            Assert.assertNotNull(result[0]);
-        }
-*/
-    }
-
-    @Test
-    public void testTranslateForWishedWordsThatDoNotMakeSense() {
-/*
-        wishedWordsThatMakeNOSense = new String[] {"apple juice please", "thisWordDoesNotExist", "!?", "-.", "420", " ", "" };
-
-        String[] result;
-
-        for (String ww: wishedWordsThatMakeNOSense) {
-
-            result = dc.translate(ww, -1);
-            Assert.assertNull(result);
-
-            result = dc.translate(ww, 0);
-            Assert.assertNull(result);
-
-            result = dc.translate(ww, 1);
-            Assert.assertNull(result);
-
-            result = dc.translate(ww, 100);
-            Assert.assertNull(result);
-        }
-*/
     }
 
     @Test
@@ -155,13 +116,14 @@ public class DatabaseCommunicatorTest {
     @Test
     public void testSynonymsForWishedWordsThatMakeSense() {
 
-        wishedWordsThatMakeSense = new String[] {"certain", "true", "happy"};
+        wishedWordsThatMakeSense = new String[] {"certain", "true", "happy", "walking", "love"};
 
         String[] result;
 
         for (String ww: wishedWordsThatMakeSense) {
 
             result = dc.giveSynonyms(ww, -1);
+
             Assert.assertNull(result);
 
             result = dc.giveSynonyms(ww, 0);
@@ -173,24 +135,6 @@ public class DatabaseCommunicatorTest {
             result = dc.giveSynonyms(ww, 100);
             Assert.assertNotNull(result[0]);
         }
-
-        wishedWordsThatMakeSense = new String[] {"walking", "love"};
-
-        for (String ww: wishedWordsThatMakeSense) {
-
-            result = dc.giveSynonyms(ww, -1);
-            Assert.assertNull(result);
-
-            result = dc.giveSynonyms(ww, 0);
-            Assert.assertNull(result);
-
-            result = dc.giveSynonyms(ww, 1);
-            Assert.assertNull(result);
-
-            result = dc.giveSynonyms(ww, 100);
-            Assert.assertNull(result);
-        }
-
     }
 
     @Test
@@ -327,7 +271,7 @@ public class DatabaseCommunicatorTest {
     @Test
     public void testScrabble_StartForWishedWordsThatMakeSense() {
 
-        wishedWordsThatMakeSense = new String[] {"success", "run", "cat"};
+        wishedWordsThatMakeSense = new String[] {"success", "fa", "cat"};
 
         String[] result;
 
@@ -344,7 +288,6 @@ public class DatabaseCommunicatorTest {
 
             result = dc.scrabble_start(ww, 100);
             Assert.assertTrue(result[0].contains(ww));
-
         }
 
     }
@@ -380,7 +323,7 @@ public class DatabaseCommunicatorTest {
     @Test
     public void testScrabble_EndForWishedWordsThatMakeSense() {
 
-        wishedWordsThatMakeSense = new String[] {"ic", "sea", "al"};
+        wishedWordsThatMakeSense = new String[] {"ic", "a", "al"};
 
         String[] result;
 
@@ -392,12 +335,12 @@ public class DatabaseCommunicatorTest {
             result = dc.scrabble_end(ww, 0);
             Assert.assertNull(result);
 
+
             result = dc.scrabble_end(ww, 1);
             Assert.assertTrue(result[0].contains(ww));
 
             result = dc.scrabble_end(ww, 100);
             Assert.assertTrue(result[0].contains(ww));
-
         }
 
     }
@@ -433,7 +376,7 @@ public class DatabaseCommunicatorTest {
     @Test
     public void testScrabble_ContainForWishedWordsThatMakeSense() {
 
-        wishedWordsThatMakeSense = new String[] {"ic", "sea", "al"};
+        wishedWordsThatMakeSense = new String[] {"ic", "l", "al"};
 
         String[] result;
 
@@ -450,7 +393,6 @@ public class DatabaseCommunicatorTest {
 
             result = dc.scrabble_contain(ww, 100);
             Assert.assertTrue(result[0].contains(ww));
-
         }
 
     }
