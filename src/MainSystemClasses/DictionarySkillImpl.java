@@ -1,27 +1,28 @@
-package DicSkill;
+package MainSystemClasses;
 
 import de.iisys.pippa.core.skill.Skill;
 import de.iisys.pippa.core.skill.SkillRegex;
 import de.iisys.pippa.core.speech_out.SpeechOut;
-import DicSkill.DictionarySkillExecutableImpl;
 
 import java.util.Collection;
 import java.util.List;
-import java.util.Scanner;
 
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.FrameworkUtil;
 import org.osgi.framework.InvalidSyntaxException;
 import org.osgi.framework.ServiceReference;
 
+import DicSkill.Context;
+import DicSkill.DatabaseCommunicator;
+import DicSkill.MessageManager;
+import DicSkill.Settings;
+import DicSkill.State;
+import MainSystemClasses.DictionarySkillExecutableImpl;
 import de.iisys.pippa.core.message.AMessage;
 import de.iisys.pippa.core.message.speech_message.SkillSpeechMessage;
 import de.iisys.pippa.core.message.stop_message.StopMessage;
 import de.iisys.pippa.core.message_processor.AMessageProcessor;
-import de.iisys.pippa.core.skill.Skill;
-import de.iisys.pippa.core.skill.SkillRegex;
 import de.iisys.pippa.core.skill_executable.ASkillExecutable;
-import de.iisys.pippa.core.speech_out.SpeechOut;
 
 /**
  * Try to integrate the skill in the main system
@@ -49,9 +50,23 @@ import de.iisys.pippa.core.speech_out.SpeechOut;
 
 public class DictionarySkillImpl extends AMessageProcessor implements Skill {
 
+	
+	private String regexExpression1 = ".*\\b(define|translate|spell|contain|start with|end with|contains|starts with|ends with)\\b .+"; 
+	private String regexExpression2 = ".*\\b(definition|spelling|translation|example( sentence)?|synonym)s?\\b \\b(of|for)\\b (.+)"; 
+	private String regexExpression3 = ".*what does (.+) mean.*"; 
+	private String regexExpression4 = "(.+) in german.*"; 
+	private String regexExpression5 = ".*what( is| are|'s) (a )?(.+)";
+	private String regexExpressionSettings = ".*\\b(set|change|put)\\b (the )?\\b(settings|\\b(number|amount)\\b of \\b(words|results)\\b).*"; // may need to put flag
+	private String regexExpressionHelper = ".*what can you do.*"; 
+	private String regexExpressionMore = ".*more.*"; // skill needs to be last skill called
+	private String regexExpressionCategory = "^.*([ a-zA-Z]*)( to| from)?( my | the )?(preferred category|preferred categories).*$"; // may need to put flag
+	
+	
 	private boolean isClosed = false;
 	
-	SkillRegex[] skillRegexes = new SkillRegex[] { new SkillRegex(this, "(translate)|(define)|(synonyms)|(translation)") };
+	SkillRegex[] skillRegexes = new SkillRegex[] { new SkillRegex(this, "(regexExpression1|regexExpression2|regexExpression3|"
+			+ "regexExpression4|regexExpression5|regexExpressionSettings|regexExpressionHelper|regexExpressionMore"
+			+ "|regexExpressionCategory)") };
 	private State state = new State();
 	private Context context = state.loadContext(); // loads context. If no context is found, creates new one.
 	private Settings settings = state.loadSettings(); // loads settings. If no settings is found, creates new one.

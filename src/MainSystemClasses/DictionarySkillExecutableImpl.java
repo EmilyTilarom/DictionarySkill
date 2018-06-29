@@ -1,5 +1,10 @@
-package DicSkill;
+package MainSystemClasses;
 
+import DicSkill.Context;
+import DicSkill.DatabaseCommunicator;
+import DicSkill.MessageManager;
+import DicSkill.Settings;
+import DicSkill.State;
 import de.iisys.pippa.core.skill_executable.ASkillExecutable;
 import de.iisys.pippa.core.speech_out.SpeechOut;
 import de.iisys.pippa.core.speech_out.SpeechOutListener;
@@ -26,13 +31,14 @@ public class DictionarySkillExecutableImpl extends ASkillExecutable implements S
 		this.settings = settings;
 		this.dbC = dbC;
 		this.tb = tb;
+		
 	}
 	
 	//actual code to run when activated
 	public void doRun() {
 		
 		//text to be spoken
-		this.speechOut.setOutputText(this, tb.decodeMsg(speechOut.toString(), settings, dbC, context), false);
+		this.speechOut.setOutputText(this, tb.decodeMsg(speechOut.toString(), settings, dbC, context, state), false);
 		
 		//play
 		this.speechOut.play(this);

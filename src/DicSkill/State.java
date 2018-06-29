@@ -7,6 +7,7 @@ import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 
+
 /**
  * 10.06.2018
  * NEW:
@@ -19,7 +20,6 @@ import java.io.ObjectOutputStream;
  * NEW:
  * -	State can now save and load context and settings
  * @author Lia
- *
  */
 
 /**
@@ -27,22 +27,24 @@ import java.io.ObjectOutputStream;
  * TO DO:
  * -	Make class to save context and settings
  * @author Lia
- *
  */
 
+/**
+ * This class saves and loads the context and settings from the files.
+ */
 public class State {
 	
 	/** VARIABLES **/
 	private File context_file;
 	private File settings_file;
 
-	/** Constructor **/
-    public State() {
+	/** CONSTRUCTOR **/
+	public State() {
 		context_file = new File("/State", "context_file.ser");
 		settings_file = new File("/State", "settings_file.ser");
 	}
 
-	/** Methods **/
+	/** METHODS **/
 
 	/**
 	 * Settings and Context are persistently saved in a .ser file.
@@ -53,11 +55,11 @@ public class State {
 	public void save(Settings settings, Context context) {
 
 		try {
-			FileOutputStream fos = new FileOutputStream("context_file.ser");
+			FileOutputStream fos = new FileOutputStream("/State/context_file.ser");
 			ObjectOutputStream oos = new ObjectOutputStream(fos);
 			oos.writeObject(context);
 
-			fos = new FileOutputStream("settings_file.ser");
+			fos = new FileOutputStream("/State/settings_file.ser");
 			oos = new ObjectOutputStream(fos);
 			oos.writeObject(settings);
 			
@@ -79,7 +81,7 @@ public class State {
 		Context context;
 			
 		try{
-			FileInputStream fis = new FileInputStream("context_file.ser");
+			FileInputStream fis = new FileInputStream("/State/context_file.ser");
 			ObjectInputStream ois = new ObjectInputStream(fis);
 			context = (Context) ois.readObject();
 			ois.close();
@@ -89,13 +91,11 @@ public class State {
 			return new Context();
 		}
 		catch(IOException e) {
-			System.out.println("New context has been created.");
 			return new Context();
 		}
 
 		return context;
 	}
-
 
 	/**
 	 * Loads the previously saved Settings with the configuration.
@@ -108,7 +108,7 @@ public class State {
 		Settings settings;
 			
 		try{
-			FileInputStream fis = new FileInputStream("settings_file.ser");
+			FileInputStream fis = new FileInputStream("/State/settings_file.ser");
 			ObjectInputStream ois = new ObjectInputStream(fis);
 			settings = (Settings) ois.readObject();
 			ois.close();
@@ -118,10 +118,10 @@ public class State {
 			return new Settings();
 		}
 		catch(IOException e) {
-			System.out.println("New settings have been created.");
 			return new Settings();
 		}
 		
 		return settings;
 	}
 }
+
