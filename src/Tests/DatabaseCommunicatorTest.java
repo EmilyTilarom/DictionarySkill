@@ -49,8 +49,6 @@ public class DatabaseCommunicatorTest {
 
         dc = new DatabaseCommunicator();
 
-        wishedWordsThatMakeSense = new String[] {"success", "running", "certain", "apple juice"};
-        wishedWordsThatMakeNOSense = new String[] {"apple juice please", "thisWordDoesNotExist", "!?", "-.", "420", " ", "" };
     }
 
     @After
@@ -189,22 +187,6 @@ public class DatabaseCommunicatorTest {
             Assert.assertNotNull(result[0]);
         }
 
-        wishedWordsThatMakeSense = new String[] {"apple juice"};
-
-        for (String ww: wishedWordsThatMakeSense) {
-
-            result = dc.giveExamples(ww, -1);
-            Assert.assertNull(result);
-
-            result = dc.giveExamples(ww, 0);
-            Assert.assertNull(result);
-
-            result = dc.giveExamples(ww, 1);
-            Assert.assertNull(result);
-
-            result = dc.giveExamples(ww, 100);
-            Assert.assertNull(result);
-        }
     }
 
     @Test
