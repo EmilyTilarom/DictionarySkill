@@ -1,7 +1,5 @@
 package Tests;
 
-import java.util.ArrayList;
-
 import org.junit.runner.*;
 import org.junit.runner.notification.Failure;
 
@@ -81,7 +79,7 @@ public class MainTest {
 
         System.out.println("--- Testing Context ---");
 
-        Result result = JUnitCore.runClasses(DatabaseCommunicatorTest.class);
+        Result result = JUnitCore.runClasses(ContextTest.class);
 
         for (Failure failure : result.getFailures()) {
             System.out.println("    -> Failure: " + failure.toString());

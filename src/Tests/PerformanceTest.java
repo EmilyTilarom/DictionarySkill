@@ -61,7 +61,7 @@ public class PerformanceTest {
         double endTime = System.currentTimeMillis();
         double duration = (endTime - startTime) / 1000;      // Convert from miliseconds to seconds
 
-        System.out.println("Definitions take "+duration+" seconds.");
+        System.out.println("    Definitions take "+duration+" seconds.");
         Assert.assertTrue(duration <= MAX_TIME);
     }
 
@@ -77,7 +77,7 @@ public class PerformanceTest {
         double endTime = System.currentTimeMillis();
         double duration = (endTime - startTime) / 1000;      // Convert from miliseconds to seconds
 
-        System.out.println("Translations take "+duration+" seconds.");
+        System.out.println("    Translations take "+duration+" seconds.");
         Assert.assertTrue(duration <= MAX_TIME);
     }
 
@@ -93,7 +93,7 @@ public class PerformanceTest {
         double endTime = System.currentTimeMillis();
         double duration = (endTime - startTime) / 1000;      // Convert from miliseconds to seconds
 
-        System.out.println("Synonyms take "+duration+" seconds.");
+        System.out.println("    Synonyms take "+duration+" seconds.");
         Assert.assertTrue(duration <= MAX_TIME);
     }
 
@@ -109,7 +109,7 @@ public class PerformanceTest {
         double endTime = System.currentTimeMillis();
         double duration = (endTime - startTime) / 1000;      // Convert from miliseconds to seconds
 
-        System.out.println("Examples take "+duration+" seconds.");
+        System.out.println("    Examples take "+duration+" seconds.");
         Assert.assertTrue(duration <= MAX_TIME);
     }
 
@@ -125,7 +125,7 @@ public class PerformanceTest {
         double endTime = System.currentTimeMillis();
         double duration = (endTime - startTime) / 1000;      // Convert from miliseconds to seconds
 
-        System.out.println("Spellings take "+duration+" seconds.");
+        System.out.println("    Spellings take "+duration+" seconds.");
         Assert.assertTrue(duration <= MAX_TIME);
     }
 
@@ -141,7 +141,7 @@ public class PerformanceTest {
         double endTime = System.currentTimeMillis();
         double duration = (endTime - startTime) / 1000;      // Convert from miliseconds to seconds
         
-        System.out.println("Scrabble functions take "+duration+" seconds.");
+        System.out.println("    Scrabble functions take "+duration+" seconds.");
         Assert.assertTrue(duration <= MAX_TIME);
     }
 
@@ -157,7 +157,7 @@ public class PerformanceTest {
         double endTime = System.currentTimeMillis();
         double duration = (endTime - startTime) / 1000;      // Convert from miliseconds to seconds
 
-        System.out.println("Helper function takes "+duration+" seconds.");
+        System.out.println("    Helper function takes "+duration+" seconds.");
         Assert.assertTrue(duration <= MAX_TIME);
     }
 
@@ -178,7 +178,7 @@ public class PerformanceTest {
         double endTime = System.currentTimeMillis();
         double duration = (endTime - startTime) / 1000;      // Convert from miliseconds to seconds
 
-        System.out.println("Asking for more results takes "+duration+" seconds.");
+        System.out.println("    Asking for more results takes "+duration+" seconds.");
         Assert.assertTrue(duration <= MAX_TIME);
     }
 }

@@ -198,27 +198,27 @@ public class Settings implements Serializable
 		
 		if(function.contains("translation")) {
 			NOW_translation = nOW;
-			System.out.println("Number of words for translations have been set to "+nOW);
+			//System.out.println("Number of words for translations have been set to "+nOW);
 		}
 		if(function.contains("definition")) {
 			NOW_definition = nOW;
-			System.out.println("Number of words for definitions have been set to "+nOW);
+			//System.out.println("Number of words for definitions have been set to "+nOW);
 		}
 		if(function.contains("synonym")) {
 			NOW_synonyms = nOW;
-			System.out.println("Number of words for synonyms have been set to "+nOW);
+			//System.out.println("Number of words for synonyms have been set to "+nOW);
 		}
 		if(function.contains("example")) {
 			NOW_examples = nOW;
-			System.out.println("Number of words for examples have been set to "+nOW);
+			//System.out.println("Number of words for examples have been set to "+nOW);
 		}
 		if(function.contains("scrabble")) {
 			NOW_definition = nOW;
-			System.out.println("Number of words for scrabble have been set to "+nOW);
+			//System.out.println("Number of words for scrabble have been set to "+nOW);
 		}
 		if(function.contains("all")) {
 			setAll(nOW);
-			System.out.println("Number of words for all have been set to "+nOW);
+			//System.out.println("Number of words for all have been set to "+nOW);
 		}
 		
 		//Reset after succesful attempt

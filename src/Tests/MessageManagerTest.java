@@ -110,12 +110,12 @@ public class MessageManagerTest {
         // Looking for context
         message = "provide me with more words";
         result = mm.decodeMsg(message, settings, databaseCom, context, state);
-        Assert.assertEquals("The translation of beautiful is wunderh¸bsch." ,result);
+        Assert.assertEquals("The translation of beautiful is wunderh√ºbsch." ,result);
 
         // Keep looking for context
         message = "provide me with even more words";
         result = mm.decodeMsg(message, settings, databaseCom, context, state);
-        Assert.assertEquals("The translation of beautiful is wunderschˆn.", result);
+        Assert.assertEquals("The translation of beautiful is wundersch√∂n.", result);
 
         // Evaluate if wished words was remembered
         message = "what are synonyms for it";
@@ -141,7 +141,7 @@ public class MessageManagerTest {
         result = mm.decodeMsg(message, settings, databaseCom, context, state);
         message = "what is the translation of great";
         result = mm.decodeMsg(message, settings, databaseCom, context, state);
-        Assert.assertEquals("The translations of great are groﬂ, bedeutend, groﬂartig, fabelhaft, fantastisch, phantastisch." ,result);
+        Assert.assertEquals("The translations of great are gro√ü, bedeutend, gro√üartig, fabelhaft, fantastisch, phantastisch." ,result);
 
         // Retverting changes for other tests
         message = "set the number of words for definitions to 1";
@@ -166,7 +166,7 @@ public class MessageManagerTest {
         // Long trail before
         message = "What is the translation of luck";
         result = mm.decodeMsg(message, settings, databaseCom, context, state);
-        Assert.assertEquals("The translation of luck is Gl¸ck." , result);
+        Assert.assertEquals("The translation of luck is Gl√ºck." , result);
 
         // Long trail after
         message = "translation of cool What the fuck jimmy put that down instantly or i will";
@@ -312,11 +312,4 @@ public class MessageManagerTest {
         Assert.assertEquals("An example for joy is a joy to behold." ,result);
     }
 
-    @Test
-    public void decodeFunctionWhatCanYouDoOnDifferentInputs() {
-
-        String result;
-        String message;
-
-    }
 }
