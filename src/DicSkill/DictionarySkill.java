@@ -3,27 +3,34 @@ package DicSkill;
 import java.util.Scanner;
 
 /**
+ * 28.06.2018
+ * NEW:
+ * -	improved code documentation
+ *	@author Lia, Walter
+ */
+
+/**
+ * 26.06.2018
+ * NEW:
+ * -	Object of class state is now given to MessageManager, which will save Settings and context
+ * @author Lia
+ */
+
+/**
  * 03.06.2018
  * NEW:
  * -	Class will now save and load settings and context
  * TO DO:
- * -	adapt, so the message may be received from the main system
  * -	reconsider when context and settings shall be saved.
  * @author Lia
- *
  */
 
 /**
- * 29.04.2018
- * This class is the one that can be run and will open a dialog with the user
- * say bye to close the dialog
- * @author Lia
- *
+ * This class is the one that will be run and will open a dialog with the user.
+ * Say bye to close the dialog.
  */
-
 public class DictionarySkill {
 
-	
 	public static void main(String[] args) {
 
 		State state = new State();
@@ -41,14 +48,11 @@ public class DictionarySkill {
 		
 		while(!msg.equals("bye"))
 		{
-			System.out.println( tb.decodeMsg(msg, settings, dbC, context) );
+			System.out.println( tb.decodeMsg(msg, settings, dbC, context, state) );
 			msg = read.nextLine().toLowerCase();
-
 		}
 		
-		state.save(settings, context); // saves the updated context
-		
 		System.out.println("Goodbye");
+		read.close();
 	}
-	
 }
