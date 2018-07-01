@@ -7,6 +7,7 @@ import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 
+
 /**
  * 10.06.2018
  * NEW:
@@ -19,7 +20,6 @@ import java.io.ObjectOutputStream;
  * NEW:
  * -	State can now save and load context and settings
  * @author Lia
- *
  */
 
 /**
@@ -27,22 +27,25 @@ import java.io.ObjectOutputStream;
  * TO DO:
  * -	Make class to save context and settings
  * @author Lia
- *
  */
 
+/**
+ * This class saves and loads the context and settings from the files.
+ */
 public class State {
 	
 	/** VARIABLES **/
 	private File context_file;
 	private File settings_file;
 
-	/** Constructor **/
-    public State() {
+
+	/** CONSTRUCTOR **/
+	public State() {
 		context_file = new File("/State", "context_file.ser");
 		settings_file = new File("/State", "settings_file.ser");
 	}
 
-	/** Methods **/
+	/** METHODS **/
 
 	/**
 	 * Settings and Context are persistently saved in a .ser file.
@@ -89,13 +92,11 @@ public class State {
 			return new Context();
 		}
 		catch(IOException e) {
-			System.out.println("New context has been created.");
 			return new Context();
 		}
 
 		return context;
 	}
-
 
 	/**
 	 * Loads the previously saved Settings with the configuration.
@@ -118,7 +119,6 @@ public class State {
 			return new Settings();
 		}
 		catch(IOException e) {
-			System.out.println("New settings have been created.");
 			return new Settings();
 		}
 		
