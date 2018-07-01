@@ -1,4 +1,11 @@
 /**
+ * 01.07.2018
+ * NEW:
+ * -    Bugfixes
+ * @author Walter
+ */
+
+/**
  * 26.06.2018
  * NEW:
  * -    made necessary changes due to additional parameter for decode msg, parameter being an Object of class "State"
@@ -21,6 +28,8 @@ import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
+
+import java.util.ArrayList;
 
 /**
  * context together with mm cuz last functiton last ww
@@ -60,13 +69,13 @@ public class ContextTest {
         String[] message = {"medicine", "animals", "sports"};
 
         // No trail
-        con.changePrefCat("add category " + message[0]);
+        con.changePrefCat("add " + message[0] + " to categories");
 
         // Trail before
-        con.changePrefCat("would you be so kind to add category " + message[1]);
+        con.changePrefCat("would you be so kind to add " +  message[1] + " to my categories ");
 
         // Trail after
-        con.changePrefCat("add category " + message[2] + "because i enjoy watching sports");
+        con.changePrefCat("add " + message[2] + " to my categories because i enjoy watching sports");
 
         Assert.assertTrue(con.getPreferredCategory().contains(message[0]));
         Assert.assertTrue(con.getPreferredCategory().contains(message[1]));
@@ -84,13 +93,13 @@ public class ContextTest {
         String[] message = {"medicine", "animals", "sports"};
 
         // No trail
-        con.changePrefCat("remove category " + message[0]);
+        con.changePrefCat("remove " + message[0] + " from my categories" );
 
         // Trail before
-        con.changePrefCat("would you be so kind to remove category " + message[1]);
+        con.changePrefCat("would you be so kind to remove " + message[1] + " from my categories");
 
         // Trail after
-        con.changePrefCat("remove category " + message[2] + "because i enjoy watching sports while drinking beer");
+        con.changePrefCat("remove " + message[2] + " from my categories because i dont want it");
 
         Assert.assertFalse(con.getPreferredCategory().contains(message[0]));
         Assert.assertFalse(con.getPreferredCategory().contains(message[1]));
@@ -102,10 +111,12 @@ public class ContextTest {
     public void testRemoveAllCategories() {
 
         testAddingCategory();
+        con.changePrefCat("delete all categories ");
 
-        String[] message = {"medicine", "animals", "sports"};
+        Assert.assertTrue(con.getPreferredCategory().isEmpty());
 
-        con.changePrefCat("remove all categories " + message[0]);
+        testAddingCategory();
+        con.changePrefCat("please delete all my categories ");
 
         Assert.assertTrue(con.getPreferredCategory().isEmpty());
     }
@@ -126,8 +137,8 @@ public class ContextTest {
         mm.decodeMsg(message, settings, databaseCom, con, state);
         Assert.assertEquals(con.getLastWishedWord(), ww);
 
-        ww = "enlightenment";
-        message = "Give me an example of" + ww;
+        ww = "walking";
+        message = "Give me an example of " + ww;
         mm.decodeMsg(message, settings, databaseCom, con, state);
         Assert.assertEquals(con.getLastWishedWord(), ww);
     }
@@ -143,14 +154,14 @@ public class ContextTest {
         mm.decodeMsg(message, settings, databaseCom, con, state);
         Assert.assertEquals(con.getLastFunctionUsed(), Function.DEFINITION);
 
-        function = "definition of";
-        message = "What is the " + function + " cat please i need the answer";
+        function = "synonym of";
+        message = "What is the " + function + " certain please i need the answer";
         mm.decodeMsg(message, settings, databaseCom, con, state);
-        Assert.assertEquals(con.getLastWishedWord(), Function.DEFINITION);
+        Assert.assertEquals(con.getLastFunctionUsed(), Function.SYNONYMS);
 
         function = "example of";
         message = "Give me an " + function + " walking";
         mm.decodeMsg(message, settings, databaseCom, con, state);
-        Assert.assertEquals(con.getLastWishedWord(), Function.EXAMPLE);
+        Assert.assertEquals(con.getLastFunctionUsed(), Function.EXAMPLE);
     }
 }

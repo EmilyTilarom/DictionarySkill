@@ -76,7 +76,7 @@ public class MainTestSkript {
 
         System.out.println("--- Job Done! ---\n");
 
-        System.out.println("--- All automated tests ---\n");
+        System.out.println("---> All automated tests <---\n");
 
         test.testMessageManager();
         test.testContext();
@@ -105,7 +105,7 @@ public class MainTestSkript {
 
     public void testMessageManager() {
 
-        System.out.println("--- Started testing MessageManager ---\n");
+        System.out.println("--- Testing MessageManager ---");
 
         Result result = JUnitCore.runClasses(MessageManagerTest.class);
 
@@ -113,12 +113,16 @@ public class MainTestSkript {
             System.out.println("    -> Failure: " + failure.toString());
         }
 
+        if(result.getFailureCount() == 0) {
+            System.out.println("    -> Everything works as expected :)");
+        }
+
         System.out.println("--- Finished testing MessageManager ---\n");
     }
 
     public void testContext() {
 
-        System.out.println("--- Started testing Context ---\n");
+        System.out.println("--- Testing Context ---");
 
         Result result = JUnitCore.runClasses(ContextTest.class);
 
@@ -126,17 +130,25 @@ public class MainTestSkript {
             System.out.println("    -> Failure: " + failure.toString());
         }
 
+        if(result.getFailureCount() == 0) {
+            System.out.println("    -> Everything works as expected :)");
+        }
+
         System.out.println("--- Finished testing Context ---\n");
     }
 
     public void testDatabaseCommunicator() {
 
-        System.out.println("--- Started testing DatabaseCommunicator ---\n");
+        System.out.println("--- Testing DatabaseCommunicator ---");
 
         Result result = JUnitCore.runClasses(DatabaseCommunicatorTest.class);
 
         for (Failure failure : result.getFailures()) {
             System.out.println("    -> Failure: " + failure.toString());
+        }
+
+        if(result.getFailureCount() == 0) {
+            System.out.println("    -> Everything works as expected :)");
         }
 
         System.out.println("--- Finished testing DatabaseCommunicator ---\n");

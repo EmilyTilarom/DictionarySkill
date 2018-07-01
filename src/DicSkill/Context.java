@@ -6,6 +6,13 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 /**
+ * 01.07.2018
+ * NEW:
+ * -	bugfix concering regex.
+ *	@author Walter
+ */
+
+/**
  * 28.06.2018
  * NEW:
  * -	improved code documentation
@@ -93,7 +100,8 @@ public class Context implements Serializable {
 		 * (preferred category|preferred categories) means one of the options must follow
 		 * .*$ means the string may end with any character, no matter how many.
 		 */
-		Pattern pattern = Pattern.compile("^.*(add|remove|delete all)([ a-zA-Z][a-zA-Z]*)( to | from )?(my |the )?(preferred category|preferred categories).*$");
+
+		Pattern pattern = Pattern.compile("^.*(add|remove|delete all|remove all)([ a-zA-Z][a-zA-Z]*)( to | from )?(my |the )?(category|categories|preferred category|preferred categories).*$");
 		Matcher matcher = pattern.matcher(msg);
 		
 		// note: matcher.group(2) returns the string of the third group. A group is marked by (). If there are more than one option, it will return the option used in the msg.
@@ -118,9 +126,6 @@ public class Context implements Serializable {
 					+ "make to your preferred categories. You may add a category, remove a "
 					+ "category or delete all preferred categories.");
 		}
-		
-	
-		
 	}
 
 	/**
@@ -132,10 +137,10 @@ public class Context implements Serializable {
 	private void addPrefCat(String cat) {
 		if(!preferredCategory.contains(cat)) {
 			preferredCategory.add(cat);
-			System.out.println(cat + " was added to your preferred categories.");
+			//System.out.println(cat + " was added to your preferred categories.");
 		}
 		else {
-			System.out.println(cat + " is already in your preferred categories.");
+			//System.out.println(cat + " is already in your preferred categories.");
 		}
 	}
 
@@ -147,10 +152,10 @@ public class Context implements Serializable {
 	private void removePrefCat(String cat) {
 		if(preferredCategory.contains(cat)) {
 			preferredCategory.remove(cat);
-			System.out.println(cat + " was removed from your preferred categories.");
+			//System.out.println(cat + " was removed from your preferred categories.");
 		}
 		else {
-			System.out.println(cat + " could not be found in your preferred categories.");
+			//System.out.println(cat + " could not be found in your preferred categories.");
 		}
 	}
 
@@ -159,7 +164,7 @@ public class Context implements Serializable {
 	 */
 	private void deleteAllPrefCat() {
 		preferredCategory.clear();
-		System.out.println("All your preferred categories were deleted.");
+		//System.out.println("All your preferred categories were deleted.");
 	}
 	
 	/** SETTERS AND GETTERS **/
