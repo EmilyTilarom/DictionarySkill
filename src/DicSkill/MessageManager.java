@@ -99,12 +99,10 @@ public class MessageManager {
 	String regexExpressionHelper;
 	String regexExpressionMore;
 	String regexExpressionCategory;
-	
 
 	/** CONSTRUCTOR **/
 	public MessageManager() {
-		
-		
+
 		// expressions for one or multiple functions (translation, definition, spelling, scrabble, examples, synonyms)
 		regexExpression1 = ".*\\b(define|translate|spell|contain|start with|end with|contains|starts with|ends with)\\b .+"; // define word
 		regexExpression2 = ".*\\b(definition|spelling|translation|example( sentence)?|synonym)s?\\b \\b(of|for)\\b (.+)"; // definition of word
@@ -123,7 +121,7 @@ public class MessageManager {
 		regexExpressionMore = ".*more.*";
 		
 		// CHANGE PREFERRED CATEGORIES
-		regexExpressionCategory = "^.*([ a-zA-Z]*)( to| from)?( my | the )?(preferred category|preferred categories).*$";
+		regexExpressionCategory = "^.*([ a-zA-Z]*)( to| from)?( my | the )?(preferred category|preferred categories|category|categories).*$";
 	}
 
 	/** METHODS **/
@@ -526,7 +524,7 @@ public class MessageManager {
 	 * The answer depends on the used function, wished word and the result.
 	 *
 	 * @param context
-	 * @param result output from the function
+	 * @param String[] result output from the function
 	 * @return String the final message for the user
 	 */
 	private String createMsg(Context context, String[] resultAsArray) {
