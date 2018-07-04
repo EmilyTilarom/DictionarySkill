@@ -4,9 +4,22 @@ import DicSkill.*;
 
 import java.util.Scanner;
 
-public class DictionarySkillImpl implements Skill{
-    private boolean isClosed = false;
-    SkillRegex[] skillRegexes = new SkillRegex[] { new SkillRegex(this, "(translate|define|synonyms|translation)") };
+    private String regexExpression1 = ".*\\b(define|translate|spell|contain|start with|end with|contains|starts with|ends with)\\b .+"; 
+	private String regexExpression2 = ".*\\b(definition|spelling|translation|example( sentence)?|synonym)s?\\b \\b(of|for)\\b (.+)"; 
+	private String regexExpression3 = ".*what does (.+) mean.*"; 
+	private String regexExpression4 = "(.+) in german.*"; 
+	private String regexExpression5 = ".*what( is| are|'s) (a )?(.+)";
+	private String regexExpressionSettings = ".*\\b(set|change|put)\\b (the )?\\b(settings|\\b(number|amount)\\b of \\b(words|results)\\b).*"; // may need to put flag
+	private String regexExpressionHelper = ".*what can you do.*"; 
+	private String regexExpressionMore = ".*more.*"; // skill needs to be last skill called
+	private String regexExpressionCategory = "^.*([ a-zA-Z]*)( to| from)?( my | the )?(preferred category|preferred categories).*$"; // may need to put flag
+	
+	
+	private boolean isClosed = false;
+	
+	SkillRegex[] skillRegexes = new SkillRegex[] { new SkillRegex(this, "(regexExpression1|regexExpression2|regexExpression3|"
+			+ "regexExpression4|regexExpression5|regexExpressionSettings|regexExpressionHelper|regexExpressionMore"
+			+ "|regexExpressionCategory)") };
     //ASkillExecutable clockSkillExecutable = null;
     //SpeechOut speechOut = null;
 
