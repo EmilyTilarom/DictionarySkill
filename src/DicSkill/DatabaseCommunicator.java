@@ -244,15 +244,29 @@ public class DatabaseCommunicator {
 		ritaResult = ritaDB.getAllSimilar(ww, pos);
 
 		// adds ritas and lucenes results to end result, while making sure there are no duplicates
-		String result[] = new String[ritaResult.length+luceneResult.length];
-		for(int i=0; i<ritaResult.length; i++) {
-			listResults.add(ritaResult[i]);
-			result[i] = ritaResult[i];
+		String[] result = null;
+
+		if(luceneResult != null) {
+			result = new String[ritaResult.length + luceneResult.length];
+
+			for(int i=0; i<ritaResult.length; i++) {
+				listResults.add(ritaResult[i]);
+				result[i] = ritaResult[i];
+			}
+
+			for(int i=0; i<luceneResult.length; i++) {
+				if(!listResults.contains(luceneResult[i])) {
+					listResults.add(luceneResult[i]);
+					result[i+ritaResult.length] = luceneResult[i];
+				}
+			}
 		}
-		for(int i=0; i<luceneResult.length; i++) {
-			if(!listResults.contains(luceneResult[i])) {
-				listResults.add(luceneResult[i]);
-				result[i+ritaResult.length] = luceneResult[i];
+		else {
+			result = new String[ritaResult.length];
+
+			for(int i=0; i<ritaResult.length; i++) {
+				listResults.add(ritaResult[i]);
+				result[i] = ritaResult[i];
 			}
 		}
 		
